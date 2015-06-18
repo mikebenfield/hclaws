@@ -4,8 +4,9 @@ module Tests.Math.ConservationLaws (
 ) where
 
 import Test.Tasty (defaultMain, TestTree, testGroup)
-import Test.Tasty.QuickCheck as QC
-import Math.ConservationLaws as CL
+import qualified Test.Tasty.QuickCheck as QC
+
+import qualified Math.ConservationLaws as CL
 
 main = defaultMain tests
 
@@ -14,9 +15,10 @@ tests = testGroup "ConservationLaws" [properties, unitTests]
 
 properties :: TestTree
 properties = testGroup "Properties"
-  [ QC.testProperty "bogus property" $
-    ((\x -> CL.aFunction == 5):: Int -> Bool)
-    ]
+             [ 
+             ]
 
 unitTests :: TestTree
-unitTests = testGroup "Unit Tests" []
+unitTests = testGroup "Unit Tests"
+  [
+  ]
