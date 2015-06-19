@@ -4,11 +4,13 @@
 module Math.LinearAlgebra (
   row, col, getRows, getCols,
 
-  toList, normP,
+  toList, m, s,
+  
+  (*.),
 
-  Additive(..), Vector(..), Normed(..),
+  Mat, 
 
-  Mat
+  normP, 
   ) where
 
 import qualified Data.Matrix as M
@@ -29,41 +31,19 @@ getCols m = fmap (\i -> M.getCol i m) [1..M.ncols m]
 toList :: M.Matrix a -> [a]
 toList m = [m M.! (i,j) | i <- [1, M.nrows m], j <- [1, M.ncols m]]
 
-infixl 6 +., -.
-class Additive a where
-  (+.) :: a -> a -> a
-  (-.) :: a -> a -> a
+m :: (a -> b) -> (M.Matrix a -> M.Matrix b)
+m f x = col [f $ x M.! (1, 1)]
 
-instance Num n => Additive n where
-  (+.) = (+)
-  (-.) = (-)
+s :: (M.Matrix a -> M.Matrix b) -> (a -> b)
+s f x = (f $ col [x]) M.! (1, 1)
 
-infixl 7  *. --, /.
--- Ultimately VectorSpace should work with different scalars than Doubles,
--- but I have not been able to get such a class to type check
-class Additive v => Vector v where
-  (*.) :: Double -> v -> v
-  --(/.) :: v -> Scalar v -> v
-  --v /. n = (1/n) *. v
-
-instance Vector Double where
-  (*.) = (*)
-
-instance Vector (M.Matrix Double) where
-  (*.) = M.scaleMatrix
+infixl 7 *.
+(*.) :: Num a => a -> M.Matrix a -> M.Matrix a
+(*.) = M.scaleMatrix
 
 type Mat = M.Matrix Double
 
-class Vector v => Normed v where
-  norm :: v -> Double
-
-instance Normed Double where
-  norm = abs
-
-instance Normed Mat where
-  norm = normP (1/0)
-
-normP :: Double -> M.Matrix Double -> Double
+normP :: Double -> Mat -> Double
 normP p m
   | p < 1 = error "normP called with p<1"
   | p == (1/0) = maximum $ map abs $ toList m

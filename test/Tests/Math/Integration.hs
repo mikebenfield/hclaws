@@ -18,13 +18,13 @@ epsilon :: Double
 epsilon = 0.1
 
 infix 1 @?~
-(@?~) :: (Normed v, Show v) => v -> v -> HU.Assertion
+(@?~) :: Mat -> Mat -> HU.Assertion
 l @?~ r 
-  | norm (l-.r) < epsilon = HU.assertString ""
+  | normP (1/0) (l-r) < epsilon = HU.assertString ""
   | otherwise = HU.assertString $ "expected: " ++ (show r) ++ " (approximately)\n" ++
                                   " but got: " ++ (show l)
 infix 1 @~?
-(@~?) :: (Normed v, Show v) => v -> v -> HU.Assertion
+(@~?) :: Mat -> Mat -> HU.Assertion
 (@~?) = flip (@?~)
 
 tests :: TestTree
@@ -39,11 +39,11 @@ unitTests :: TestTree
 unitTests = testGroup "Unit Tests"
   [
     HU.testCase "simpson 1" $
-      I.simpson (\x -> x^2) 0 1 @?~ (1/3)
+      I.simpson (\x -> col [x^2]) 0 1 @?~ col [1/3]
   , HU.testCase "simpson 2" $
-      I.simpson sin 0 pi @?~ 2
+      I.simpson (\x -> col [sin x]) 0 pi @?~ col [2]
   , HU.testCase "adaptiveSimpson 1" $
-      I.adaptiveSimpson 0.01 sin 0 pi @?~ 2
+      I.adaptiveSimpson 0.01 (\x -> col [sin x]) 0 pi @?~ col [2]
   , HU.testCase "adaptiveSimpson matrix 1" $
       I.adaptiveSimpson 0.01 (\x -> col [x, x^2]) 0 1 @?~ col [1/2, 1/3]
   ]

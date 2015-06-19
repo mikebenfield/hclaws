@@ -12,38 +12,35 @@ import Data.Matrix as M
 
 import Math.LinearAlgebra
 
-simpson :: Vector v => (Double -> v) -> Double -> Double -> v
-simpson f a b = factor *. (f a +. 4*.f m +. f b)
+simpson :: (Double -> Mat) -> Double -> Double -> Mat
+simpson f a b = factor *. (f a + 4*.f m + f b)
   where
     m = (b+a)/2
     factor = (b-a)/6
 
-adaptiveSimpson :: Normed v => Double -> (Double -> v) -> Double -> Double -> v
+adaptiveSimpson :: Double -> (Double -> Mat) -> Double -> Double -> Mat
 adaptiveSimpson ε f a b = 
-  if norm ((sac +. scb) -. sab) / 15 < ε then
-    sac +. scb
+  if normP (1/0) (sac + scb - sab) / 15 < ε then
+    sac + scb
   else
-    adaptiveSimpson ε f a c +. adaptiveSimpson ε f c b
+    adaptiveSimpson ε f a c + adaptiveSimpson ε f c b
   where
     c = (b+a)/2
     sab = simpson f a b
     sac = simpson f a c
     scb = simpson f c b
 
---adaptiveSimpsonMat :: Double -> (Double -> Mat) -> Double -> Double -> Mat
---adaptiveSimpsonMat ε f a b = fmap 
-
-adaptiveSimpsonLineIntegral :: Double->
+adaptiveSimpsonLineIntegral :: Double ->
+                               (Double -> k) ->
                                (Double -> Mat) ->
-                               (Double -> Mat) ->
-                               (Mat -> Mat) ->
+                               (k -> Mat) ->
                                Double ->
                                Double ->
-                               Double
+                               Mat
 adaptiveSimpsonLineIntegral ε γ γ' ω a b =
   adaptiveSimpson ε f a b
   where
-    f t = ((ω $ γ t) * γ' t) M.! (1, 1)
+    f t = (ω $ γ t) * γ' t 
 
 -- some useful curves in R^2
 
