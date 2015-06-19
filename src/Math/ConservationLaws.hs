@@ -1,8 +1,8 @@
 
 module Math.ConservationLaws (
-  CharField(..), System(..), ValueWave, SeparatorWave, WaveFan,
+  CharField(..), System(..), ValueWave(..), SeparatorWave(..), WaveFan(..),
   solutionForm, 
-  evalWaveAtSpeed, evalWaveFanAtSpeed,
+  evalWaveAtSpeed, evalWaveFanAtSpeed, waveFanFromList,
   solveRiemann,
 ) where
 
@@ -10,42 +10,34 @@ import qualified Data.Matrix as M
 
 import Math.LinearAlgebra
 
-type MatField = Mat -> Mat
-type ScalarField = Mat -> Double
-type Curve = Double -> Mat
-type BasePointCurve = Mat -> Curve
+type MatField a = a -> a
+type ScalarField a = a -> Double
+type Curve a = Double -> a
+type BasePointCurve a = a -> Curve a
+type PotentialSolution a = Double -> Double -> a
 
-data CharField = CharField { λ                :: ScalarField
-                           , r                :: MatField
-                           , rarefactionCurve :: BasePointCurve
-                           , shockCurve       :: BasePointCurve
-                           , s                :: Mat -> Double -> Double
-                           , gnl              :: Bool
-                           }
+data CharField a = CharField { λ                :: ScalarField a
+                             , r                :: MatField a
+                             , rarefactionCurve :: BasePointCurve a
+                             , shockCurve       :: BasePointCurve a
+                             , s                :: a -> Double -> Double
+                             , gnl              :: Bool
+                             }
 
-data System = System { n        :: Int
-                     , flux     :: MatField
-                     , dFlux    :: MatField
-                     , families :: [CharField]
-                     }
+data System a = System { n        :: Int
+                       , flux     :: MatField a
+                       , dFlux    :: MatField a
+                       , families :: [CharField a]
+                       }
 
-solutionForm :: System -> MatField
-solutionForm s u = M.matrix (n s) 2 f
-  where
-    f (i, 1) = u M.! (i, 1)
-    f (i, 2) = -(flux s u) M.! (i, 1)
-    f _ = error "solutionForm"
+solutionForm :: Num a => System a 
+             -> PotentialSolution a -> Double -> Double -> M.Matrix a
+solutionForm s u x t = row [u x t, -(flux s $ u x t)]
 
---differentialForm :: VecField -> VecField -> VecField
---differentialForm u flux' x = V.fromList [ux, flux' ux]
---  where
---    ux = u x
+data ValueWave a = Rarefaction (Double -> a) (Maybe Int)
+                 | Constant a
 
--- The argument in the case of Kink or Shock is the speed of the wave
-data ValueWave = Rarefaction (Double -> Mat) (Maybe Int)
-               | Constant Mat
-
-evalWaveAtSpeed :: ValueWave -> Double -> Mat
+evalWaveAtSpeed :: ValueWave a -> Double -> a
 evalWaveAtSpeed (Rarefaction f _) speed = f speed
 evalWaveAtSpeed (Constant v) _          = v
 
@@ -53,14 +45,14 @@ data SeparatorWave = Shock (Maybe Int)
                    | Front (Maybe Int)
                    | Kink 
 
-data WaveFan = Waves { value      :: ValueWave
-                     , endSpeed   :: Double
-                     , endingWave :: SeparatorWave
-                     , rest       :: WaveFan
-                     }
-             | Wave ValueWave
+data WaveFan a = Waves { value      :: ValueWave a
+                       , endSpeed   :: Double
+                       , endingWave :: SeparatorWave
+                       , rest       :: WaveFan a
+                       }
+               | Wave (ValueWave a)
 
-findWaveAtSpeed :: WaveFan -> Double -> ValueWave
+findWaveAtSpeed :: WaveFan a -> Double -> ValueWave a
 findWaveAtSpeed Waves {value=w, endSpeed=es, rest=r} s =
   if s <= es then
     w
@@ -68,13 +60,26 @@ findWaveAtSpeed Waves {value=w, endSpeed=es, rest=r} s =
     findWaveAtSpeed r s
 findWaveAtSpeed (Wave w) _ = w
     
-evalWaveFanAtSpeed :: WaveFan -> Double -> Mat
+evalWaveFanAtSpeed :: WaveFan a -> Double -> a
 evalWaveFanAtSpeed wf s =
   evalWaveAtSpeed (findWaveAtSpeed wf s) s
   
-evalWaveFanAtPoint :: WaveFan -> Double -> Double -> Mat
+evalWaveFanAtPoint :: WaveFan a -> Double -> Double -> a
 evalWaveFanAtPoint wf x t = evalWaveFanAtSpeed wf (x/t)
 
-solveRiemann :: System -> Double -> Double -> WaveFan
+solveRiemann :: System a -> Double -> Double -> WaveFan a
 solveRiemann sys uL uR = error "XXX"
+
+waveFanFromList :: [(ValueWave a, Double, SeparatorWave)] -> Maybe (WaveFan a)
+waveFanFromList [] = Nothing
+waveFanFromList ((vw, _, _):[])         = Just $ Wave vw
+waveFanFromList ((vw, speed, sep):more) = 
+  case waveFanFromList more of
+    Nothing -> Nothing
+    Just rest' ->
+      Just $ Waves { value = vw
+                   , endSpeed = speed
+                   , endingWave = sep
+                   , rest = rest'
+                   }
 
