@@ -1,6 +1,6 @@
 
 module Math.Integration (
-    simpson, adaptiveSimpson , adaptiveSimpsonLineIntegral,
+    simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral,
     circle, circle',
     lineSegment, lineSegment',
     box, box',
@@ -11,22 +11,40 @@ import Data.Matrix as M
 
 import Math.LinearAlgebra
 
-simpson :: (Double -> Mat) -> Double -> Double -> Mat
-simpson f a b =
-    factor *. (f a + 4*.f m + f b)
+simpson' :: Mat -> Mat -> Mat -> Double -> Double -> Mat
+simpson' fa fb fm a b =
+    factor *. (fa + 4 *. fm + fb)
   where
-    m = (b+a)/2
     factor = (b-a)/6
 
-adaptiveSimpson :: Double -> (Double -> Mat) -> Double -> Double -> Mat
-adaptiveSimpson ε f a b
-  | normP (1/0) (sac + scb - sab) / 15 < ε = sac + scb
-  | otherwise = adaptiveSimpson ε f a c + adaptiveSimpson ε f c b
+simpson :: (Double -> Mat) -> Double -> Double -> Mat
+simpson f a b = simpson' (f a) (f b) (f m) a b
   where
-    c = (b+a)/2
-    sab = simpson f a b
-    sac = simpson f a c
-    scb = simpson f c b
+    m = (b+a)/2
+
+-- This private function is somewhat complicated to avoid redundant calls to
+-- simpson' or to f
+adaptiveSimpson' ε f a b m fa fb fm sab
+  | normP (1/0) (sam + smb - sab) / 15 < ε = sam + smb
+  | otherwise =
+        adaptiveSimpson' ε f a m a_m fa fm fa_m sam
+      + adaptiveSimpson' ε f m b m_b fm fb fm_b smb
+  where
+    a_m = (a+m)/2
+    fa_m = f a_m
+    sam = simpson' fa fm fa_m a m
+    m_b = (m+b)/2
+    fm_b = f m_b
+    smb = simpson' fm fb fm_b m b
+
+adaptiveSimpson :: Double -> (Double -> Mat) -> Double -> Double -> Mat
+adaptiveSimpson ε f a b =
+    adaptiveSimpson' ε f a b m fa fb fm $ simpson' fa fb fm a b
+  where
+    m = (a+b)/2
+    fa = f a
+    fb = f b
+    fm = f m
 
 adaptiveSimpsonLineIntegral
     :: Double
