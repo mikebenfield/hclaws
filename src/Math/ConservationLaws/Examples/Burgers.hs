@@ -20,7 +20,7 @@ field =
         , r = \_ -> 1
         , rarefactionCurve = \pt a -> pt + col [a]
         , shockCurve = \pt a -> pt + col [a]
-        , shockSpeed = \pt a -> pt M.! (1,1) + a
+        , shockSpeed = \ul ur -> (1/2) * ((ul + ur) M.! (1,1))
         , gnl = True
         }
 
@@ -31,6 +31,7 @@ system =
         , flux = \u -> (1/2) *. u^2
         , dFlux = id
         , fields = [field]
+        , strengths = \ul ur -> ur-ul
         }
 
 solution1 :: WaveFan

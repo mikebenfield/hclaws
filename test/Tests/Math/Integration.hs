@@ -9,6 +9,9 @@ import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
 import Test.HUnitExtras
+
+import Data.Matrix (fromLists)
+
 import Math.LinearAlgebra
 
 import qualified Math.Integration as I
@@ -23,6 +26,7 @@ properties = testGroup "Properties"
 
 form1 m = row [1, 1]
 form2 m = row [I.t m, I.x m]
+form3 m = fromLists [[1, 1], [I.t m, I.x m]]
 (segment1, segment1') = I.lineSegment_ (col [0, 0]) (col [2, 3])
 (circle1, circle1') = I.circle_ (col [1, 1]) 1
 (box1, box1') = I.box_ (col [0, 0]) 1 3
@@ -57,5 +61,8 @@ unitTests = testGroup "Unit Tests"
     , HU.testCase "adaptiveSimpsonLineIntegral 6" $
           I.adaptiveSimpsonLineIntegral 
               acc box1 box1' form2 0 1 @?~ col [0]
+    , HU.testCase "adaptiveSimpsonLineIntegral 7" $
+          I.adaptiveSimpsonLineIntegral 
+              acc box1 box1' form3 0 1 @?~ col [0, 0]
     ]
 

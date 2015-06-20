@@ -24,7 +24,7 @@ data CharField =
         , r :: MatField
         , rarefactionCurve :: BasePointCurve
         , shockCurve :: BasePointCurve
-        , shockSpeed :: Mat -> Double -> Double
+        , shockSpeed :: Mat -> Mat -> Double
         , gnl :: Bool
         }
 
@@ -34,6 +34,7 @@ data System =
         , flux :: MatField
         , dFlux :: MatField
         , fields :: [CharField]
+        , strengths :: Mat -> Mat -> Mat
         }
 
 data ValueWave =
@@ -96,8 +97,7 @@ solutionForm s u xt =
     t = xt M.! (2, 1)
     uxt = u x t
 
-accuracy = 0.00001
-epsilon = 0.01
+accuracy = 0.000001
 
 checkSolnOnCurve
     :: Curve
