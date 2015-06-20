@@ -1,6 +1,8 @@
 
 module Math.ConservationLaws.Examples (
-    burgers
+    burgers,
+    burgersSolution1, burgersSolution2, burgersSolution3,
+    burgersNonsolution,
 ) where
 
 import Data.Maybe (fromJust)
@@ -34,22 +36,30 @@ burgersSolution1 :: WaveFan
 burgersSolution1 =
   fromJust $ waveFanFromList
       [ (Constant $ col [1], 1/2, Shock $ Just 1)
-      , (Constant $ 0, 0, Kink)
+      , (Constant $ col [0], 0, Kink)
       ]
 
 -- this is not an entropy solution
 burgersSolution2 :: WaveFan
 burgersSolution2 =
   fromJust $ waveFanFromList
-      [ (Constant $ col [1], 1/2, Shock $ Just 1)
+      [ (Constant $ col [0], 1/2, Shock $ Just 1)
       , (Constant $ col [1], 0, Kink)
       ]
 
 burgersSolution3 :: WaveFan
 burgersSolution3 =
-  fromJust $ waveFanFromList 
-      [ (Constant $ col [1], 0, Kink)
+  fromJust $ waveFanFromList
+      [ (Constant $ col [0], 0, Kink)
       , (Rarefaction (\x -> col [x]) $ Just 1, 1, Kink)
       , (Constant $ col [1], 0, Kink)
       ]
+
+burgersNonsolution :: WaveFan
+burgersNonsolution =
+  fromJust $ waveFanFromList
+      [ (Constant $ col [1], 1/2, Shock $ Just 1)
+      , (Constant $ col [2], 0, Kink)
+      ]
+
 

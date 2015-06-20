@@ -1,11 +1,14 @@
 
 module Math.Integration (
     simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral,
-    circle, circle',
-    lineSegment, lineSegment',
-    box, box',
+    x, t,
+    circle, circle', circle_,
+    lineSegment, lineSegment', lineSegment_,
+    box, box', box_,
     glueCurves
 ) where
+
+import Control.Exception.Base (assert)
 
 import Data.Matrix as M
 
@@ -61,6 +64,18 @@ adaptiveSimpsonLineIntegral ε γ γ' ω a b =
 
 -- some useful curves in R^2
 
+x :: Mat -> Double
+x m = 
+    assert (dims == (2, 1)) (m M.! (1,1))
+  where
+    dims = (nrows m, ncols m)
+
+t :: Mat -> Double
+t m = 
+    assert (dims == (2, 1)) (m M.! (2,1))
+  where
+    dims = (nrows m, ncols m)
+
 circle :: Mat -> Double -> Double -> Mat
 circle center radius t =
     col [radius*cos (2*pi*t), radius*sin (2*pi*t)] + center
@@ -71,11 +86,17 @@ circle' radius t =
   where
     factor = 2*pi*radius
 
+circle_ :: Mat -> Double -> (Double -> Mat, Double -> Mat)
+circle_ center radius = (circle center radius, circle' radius)
+
 lineSegment :: Mat -> Mat -> Double -> Mat
 lineSegment p q t = scaleMatrix (1-t) p + scaleMatrix t q
 
 lineSegment' :: Mat -> Mat -> Double -> Mat
 lineSegment' p q _ = q - p
+
+lineSegment_ :: Mat -> Mat -> (Double -> Mat, Double -> Mat)
+lineSegment_ p q = (lineSegment p q, lineSegment' p q)
 
 glueCurves :: [Double -> a] -> Double -> a
 glueCurves curves t =
@@ -101,8 +122,8 @@ box lowerLeft width height =
     e2 = col [0, height]
     c1 = lowerLeft
     c2 = lowerLeft + e1
-    c3 = c2 - e2
-    c4 = lowerLeft + e1
+    c3 = c2 + e2
+    c4 = lowerLeft + e2
 
 box' :: Double -> Double -> Double -> Mat
 box' width height =
@@ -110,6 +131,9 @@ box' width height =
   where
     e1 = col [width, 0] :: Mat
     e2 = col [0, height]
+
+box_ :: Mat -> Double -> Double -> (Double -> Mat, Double -> Mat)
+box_ lowerLeft width height = (box lowerLeft width height, box' width height)
 
 ---- γ is the curve we are integrating over
 ---- ω is a 1-form: interpret its components as the coefficients of dx^i

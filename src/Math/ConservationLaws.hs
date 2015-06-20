@@ -3,8 +3,9 @@ module Math.ConservationLaws (
     matBpc,
     CharField(..), System(..), ValueWave(..), SeparatorWave(..), WaveFan(..),
     solutionForm,
-    evalWaveAtSpeed, evalWaveFanAtSpeed, waveFanFromList,
+    evalWaveAtSpeed, evalWaveFanAtSpeed, evalWaveFanAtPoint, waveFanFromList,
     solveRiemann,
+    checkSolnOnCurve,
 ) where
 
 import qualified Data.Matrix as M
@@ -16,7 +17,7 @@ type MatField = Mat -> Mat
 type ScalarField = Mat -> Double
 type Curve = Double -> Mat
 type BasePointCurve = Mat -> Curve
-type PotentialSolution = (Double, Double) -> Mat
+type PotentialSolution = Double -> Double -> Mat
 
 matBpc :: (Double -> Double -> Double) -> BasePointCurve
 matBpc f mx a = m (flip f a) mx
@@ -91,20 +92,23 @@ waveFanFromList ((vw, speed, sep):more) =
                 , rest = rest'
                 }
 
-solutionForm :: System -> PotentialSolution -> (Double, Double) -> Mat
-solutionForm s u (x, t) = u (x, t) M.<|> negate (flux s $ u (x, t))
+solutionForm :: System -> PotentialSolution -> Mat -> Mat
+solutionForm s u xt =
+    uxt M.<|> negate (flux s $ uxt)
+  where
+    x = xt M.! (1, 1)
+    t = xt M.! (2, 1)
+    uxt = u x t
 
-accuracy = 0.01
+accuracy = 0.00001
 epsilon = 0.01
 
 checkSolnOnCurve
-    :: (Double -> (Double, Double))
-    -> (Double -> Mat)
+    :: Curve
+    -> Curve
     -> System
     -> PotentialSolution
     -> Mat
 checkSolnOnCurve c c' s u =
-  I.adaptiveSimpsonLineIntegral accuracy c c' (solutionForm s u) 0 1
-
-
+    I.adaptiveSimpsonLineIntegral accuracy c c' (solutionForm s u) 0 1
 
