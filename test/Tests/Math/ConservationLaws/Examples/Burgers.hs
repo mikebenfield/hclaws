@@ -1,5 +1,5 @@
 
-module Tests.Math.ConservationLaws.Examples (
+module Tests.Math.ConservationLaws.Examples.Burgers (
     tests
 ) where
 
@@ -12,12 +12,12 @@ import Test.HUnitExtras
 import Math.LinearAlgebra
 
 import qualified Math.ConservationLaws as CL
-import qualified Math.ConservationLaws.Examples as E
+import qualified Math.ConservationLaws.Examples.Burgers as B
 
 import qualified Math.Integration as I
 
 tests :: TestTree
-tests = testGroup "Math.ConservationLaws.Examples" [properties, unitTests]
+tests = testGroup "Math.ConservationLaws.Examples.Burgers" [properties, unitTests]
 
 properties :: TestTree
 properties = testGroup "Properties"
@@ -38,6 +38,6 @@ curvesAndWaveFanCase msg (c, c') s wf =
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
-    map (\(c_, i) -> curvesAndWaveFanCase (show i) c_ E.burgers E.burgersSolution1) $
+    map (\(c_, i) -> curvesAndWaveFanCase (show i) c_ B.system B.solution1) $
         zip testCurves [1..]
 

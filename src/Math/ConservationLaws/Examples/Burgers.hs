@@ -1,8 +1,9 @@
 
-module Math.ConservationLaws.Examples (
-    burgers,
-    burgersSolution1, burgersSolution2, burgersSolution3,
-    burgersNonsolution,
+module Math.ConservationLaws.Examples.Burgers (
+    system,
+    solution1, solution2, solution3,
+    solutions,
+    nonsolution,
 ) where
 
 import Data.Maybe (fromJust)
@@ -12,8 +13,8 @@ import qualified Data.Matrix as M
 import Math.LinearAlgebra
 import Math.ConservationLaws
 
-burgersFamily :: CharField
-burgersFamily =
+family :: CharField
+family =
     CharField
         { λ = \x -> x M.! (1,1)
         , r = \_ -> 1
@@ -23,40 +24,42 @@ burgersFamily =
         , gnl = True
         }
 
-burgers :: System
-burgers =
+system :: System
+system =
     System
         { n = 1
         , flux = \u -> (1/2) *. u^2
         , dFlux = id
-        , families = [burgersFamily]
+        , families = [family]
         }
 
-burgersSolution1 :: WaveFan
-burgersSolution1 =
+solution1 :: WaveFan
+solution1 =
   fromJust $ waveFanFromList
       [ (Constant $ col [1], 1/2, Shock $ Just 1)
       , (Constant $ col [0], 0, Kink)
       ]
 
 -- this is not an entropy solution
-burgersSolution2 :: WaveFan
-burgersSolution2 =
+solution2 :: WaveFan
+solution2 =
   fromJust $ waveFanFromList
       [ (Constant $ col [0], 1/2, Shock $ Just 1)
       , (Constant $ col [1], 0, Kink)
       ]
 
-burgersSolution3 :: WaveFan
-burgersSolution3 =
+solution3 :: WaveFan
+solution3 =
   fromJust $ waveFanFromList
       [ (Constant $ col [0], 0, Kink)
       , (Rarefaction (\x -> col [x]) $ Just 1, 1, Kink)
       , (Constant $ col [1], 0, Kink)
       ]
 
-burgersNonsolution :: WaveFan
-burgersNonsolution =
+solutions = [solution1, solution2, solution3]
+
+nonsolution :: WaveFan
+nonsolution =
   fromJust $ waveFanFromList
       [ (Constant $ col [1], 1/2, Shock $ Just 1)
       , (Constant $ col [2], 0, Kink)
