@@ -1,6 +1,5 @@
 
 module Math.ConservationLaws (
-    matBpc,
     CharField(..), System(..), ValueWave(..), SeparatorWave(..), WaveFan(..),
     solutionForm,
     evalWaveAtSpeed, evalWaveFanAtSpeed, evalWaveFanAtPoint, waveFanFromList,
@@ -18,9 +17,6 @@ type ScalarField = Mat -> Double
 type Curve = Double -> Mat
 type BasePointCurve = Mat -> Curve
 type PotentialSolution = Double -> Double -> Mat
-
-matBpc :: (Double -> Double -> Double) -> BasePointCurve
-matBpc f mx a = m (flip f a) mx
 
 data CharField =
     CharField

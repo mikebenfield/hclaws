@@ -16,9 +16,9 @@ burgersFamily :: CharField
 burgersFamily =
     CharField
         { λ = \x -> x M.! (1,1)
-        , r = m $ \_ -> 1
-        , rarefactionCurve = matBpc $ \pt a -> pt + a
-        , shockCurve = matBpc $ \pt a -> pt + a
+        , r = \_ -> 1
+        , rarefactionCurve = \pt a -> pt + col [a]
+        , shockCurve = \pt a -> pt + col [a]
         , shockSpeed = \pt a -> pt M.! (1,1) + a
         , gnl = True
         }
@@ -27,8 +27,8 @@ burgers :: System
 burgers =
     System
         { n = 1
-        , flux = m $ \u -> u^2/2
-        , dFlux = m id
+        , flux = \u -> (1/2) *. u^2
+        , dFlux = id
         , families = [burgersFamily]
         }
 

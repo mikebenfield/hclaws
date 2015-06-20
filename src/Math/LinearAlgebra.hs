@@ -3,7 +3,7 @@
 
 module Math.LinearAlgebra (
     row, col, getRows, getCols,
-    toList, m, s,
+    toList,
     (*.),
     Mat,
     normP,
@@ -26,12 +26,6 @@ getCols m = fmap (\i -> M.getCol i m) [1..M.ncols m]
 
 toList :: M.Matrix a -> [a]
 toList m = [m M.! (i,j) | i <- [1, M.nrows m], j <- [1, M.ncols m]]
-
-m :: (a -> b) -> (M.Matrix a -> M.Matrix b)
-m f x = col [f $ x M.! (1, 1)]
-
-s :: (M.Matrix a -> M.Matrix b) -> (a -> b)
-s f x = (f $ col [x]) M.! (1, 1)
 
 infixl 7 *.
 (*.) :: Num a => a -> M.Matrix a -> M.Matrix a
