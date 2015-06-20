@@ -13,8 +13,8 @@ import qualified Data.Matrix as M
 import Math.LinearAlgebra
 import Math.ConservationLaws
 
-family :: CharField
-family =
+field :: CharField
+field =
     CharField
         { λ = \x -> x M.! (1,1)
         , r = \_ -> 1
@@ -30,7 +30,7 @@ system =
         { n = 1
         , flux = \u -> (1/2) *. u^2
         , dFlux = id
-        , families = [family]
+        , fields = [field]
         }
 
 solution1 :: WaveFan

@@ -33,7 +33,7 @@ data System =
         { n :: Int
         , flux :: MatField
         , dFlux :: MatField
-        , families :: [CharField]
+        , fields :: [CharField]
         }
 
 data ValueWave =
