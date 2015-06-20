@@ -7,9 +7,8 @@ import qualified Tests.Math.Integration
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Tests" 
-  [
-    Tests.Math.ConservationLaws.tests
+tests = testGroup "Tests"
+  [ Tests.Math.ConservationLaws.tests
   , Tests.Math.Integration.tests
   ]
 

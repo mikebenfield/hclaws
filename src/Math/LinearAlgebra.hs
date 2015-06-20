@@ -2,16 +2,12 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 
 module Math.LinearAlgebra (
-  row, col, getRows, getCols,
-
-  toList, m, s,
-  
-  (*.),
-
-  Mat, 
-
-  normP, 
-  ) where
+    row, col, getRows, getCols,
+    toList, m, s,
+    (*.),
+    Mat,
+    normP,
+) where
 
 import qualified Data.Matrix as M
 import qualified Data.Vector as V

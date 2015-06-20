@@ -1,6 +1,6 @@
 
 module Tests.Math.ConservationLaws (
-  tests
+    tests
 ) where
 
 import Test.Tasty (defaultMain, TestTree, testGroup)
@@ -15,10 +15,10 @@ tests = testGroup "ConservationLaws" [properties, unitTests]
 
 properties :: TestTree
 properties = testGroup "Properties"
-             [ 
-             ]
+    [
+    ]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests"
-  [
-  ]
+    [
+    ]
