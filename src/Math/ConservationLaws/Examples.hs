@@ -62,4 +62,3 @@ burgersNonsolution =
       , (Constant $ col [2], 0, Kink)
       ]
 
-

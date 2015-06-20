@@ -3,34 +3,18 @@ module Tests.Math.ConservationLaws.Examples (
     tests
 ) where
 
-import Test.Tasty (defaultMain, TestTree, testGroup)
+import Test.Tasty (TestTree, testGroup)
 import qualified Test.Tasty.QuickCheck as QC
 import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
-import qualified Math.ConservationLaws as CL
-import qualified Math.ConservationLaws.Examples as E
-import qualified Math.Integration as I
-
+import Test.HUnitExtras
 import Math.LinearAlgebra
 
-main = defaultMain tests
+import qualified Math.ConservationLaws as CL
+import qualified Math.ConservationLaws.Examples as E
 
-epsilon :: Double
-epsilon = 0.01
-
-infix 1 @?~
-(@?~) :: Mat -> Mat -> HU.Assertion
-l @?~ r
-  | normP (1/0) (l-r) < epsilon = HU.assertString ""
-  | otherwise =
-        HU.assertString $
-            "expected: " ++ (show r) ++ " (approximately)\n" ++
-                " but got: " ++ (show l)
-
-infix 1 @~?
-(@~?) :: Mat -> Mat -> HU.Assertion
-(@~?) = flip (@?~)
+import qualified Math.Integration as I
 
 tests :: TestTree
 tests = testGroup "Math.ConservationLaws.Examples" [properties, unitTests]
