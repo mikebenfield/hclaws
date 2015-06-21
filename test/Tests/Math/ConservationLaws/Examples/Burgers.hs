@@ -24,7 +24,7 @@ properties = testGroup "Properties"
     [
     ]
 
-testCurves = 
+testCurves =
     [ I.box_ (col [0, 1]) 1 2
     , I.box_ (col [0, 0]) 2 2
     , I.circle_ (col [1, 1]) 1
@@ -34,7 +34,7 @@ testCurves =
 
 curvesAndWaveFanCase msg (c, c') s wf =
     HU.testCase msg $
-      CL.checkSolnOnCurve c c' s (CL.evalWaveFanAtPoint wf) @?~ col [0]
+      CL.checkSolnOnCurve c c' s (CL.atPoint wf) @?~ col [0]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $

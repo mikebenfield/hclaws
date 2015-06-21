@@ -39,7 +39,7 @@ field1 =
         , rarefactionCurve = rarefaction1
         , shockCurve = shock1
         , shockSpeed = speed1
-        , gnl = True
+        , linearity = GNL
         }
 
 rarefaction2 m a =
@@ -66,7 +66,7 @@ field2 =
         , rarefactionCurve = rarefaction2
         , shockCurve = shock2
         , shockSpeed = speed2
-        , gnl = True
+        , linearity = GNL
         }
 
 system :: System
@@ -80,10 +80,8 @@ system =
         }
 
 solution1 =
-    fromJust $ waveFanFromList
-    [ (Constant pt1, speed, Shock $ Just 1)
-    , (Constant pt2, 0, Kink)
-    ]
+    Waves pt1 (Shock speed $ Just 1) $
+    Last pt2
   where
     pt1 = col [1,1]
     pt2 = shock1 pt1 (-1)

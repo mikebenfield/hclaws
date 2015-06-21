@@ -1,8 +1,9 @@
 
 module Math.ConservationLaws (
-    CharField(..), System(..), ValueWave(..), SeparatorWave(..), WaveFan(..),
+    CharField(..), System(..), Wave(..), WaveFan(..),
+    Linearity(..),
     solutionForm,
-    evalWaveAtSpeed, evalWaveFanAtSpeed, evalWaveFanAtPoint, waveFanFromList,
+    atSpeed, atPoint,
     solveRiemann,
     checkSolnOnCurve,
 ) where
@@ -18,6 +19,8 @@ type Curve = Double -> Mat
 type BasePointCurve = Mat -> Curve
 type PotentialSolution = Double -> Double -> Mat
 
+data Linearity = GNL | LDG | Neither
+
 data CharField =
     CharField
         { λ :: ScalarField
@@ -25,7 +28,7 @@ data CharField =
         , rarefactionCurve :: BasePointCurve
         , shockCurve :: BasePointCurve
         , shockSpeed :: Mat -> Mat -> Double
-        , gnl :: Bool
+        , linearity :: Linearity
         }
 
 data System =
@@ -37,57 +40,37 @@ data System =
         , strengths :: Mat -> Mat -> Mat
         }
 
-data ValueWave =
-    Rarefaction (Double -> Mat) (Maybe Int)
-  | Constant Mat
+data Wave =
+    Rarefaction Double Double (Double -> Mat) (Maybe Int)
+  | Shock Double (Maybe Int)
+  | Front Double (Maybe Int)
 
-evalWaveAtSpeed :: ValueWave -> Double -> Mat
-evalWaveAtSpeed (Rarefaction f _) speed = f speed
-evalWaveAtSpeed (Constant v) _ = v
+startSpeed :: Wave -> Double
+startSpeed (Rarefaction s _ _ _) = s
+startSpeed (Shock s _) = s
+startSpeed (Front s _) = s
 
-data SeparatorWave =
-    Shock (Maybe Int)
-  | Front (Maybe Int)
-  | Kink
+endSpeed :: Wave -> Double
+endSpeed (Rarefaction _ s _ _) = s
+endSpeed (Shock s _) = s
+endSpeed (Front s _) = s
 
 data WaveFan =
-    Waves
-        { value :: ValueWave
-        , endSpeed :: Double
-        , endingWave :: SeparatorWave
-        , rest :: WaveFan
-        }
-  | Wave ValueWave
+    Waves Mat Wave WaveFan
+  | Last Mat
 
-findWaveAtSpeed :: WaveFan -> Double -> ValueWave
-findWaveAtSpeed Waves {value=w, endSpeed=es, rest=r} s
-  | s <= es = w
-  | otherwise = findWaveAtSpeed r s
-findWaveAtSpeed (Wave w) _ = w
+atSpeed :: WaveFan -> Double -> Mat
+atSpeed (Waves m (Rarefaction startSpeed_ endSpeed_ f _) wf) s
+  | s <= startSpeed_ = m
+  | s <= endSpeed_ = f s
+  | otherwise = atSpeed wf s
+atSpeed (Waves m w wf) s
+  | s <= startSpeed w = m
+  | otherwise = atSpeed wf s
+atSpeed (Last m) _ = m
 
-evalWaveFanAtSpeed :: WaveFan -> Double -> Mat
-evalWaveFanAtSpeed wf s =
-    evalWaveAtSpeed (findWaveAtSpeed wf s) s
-
-evalWaveFanAtPoint :: WaveFan -> Double -> Double -> Mat
-evalWaveFanAtPoint wf x t = evalWaveFanAtSpeed wf (x/t)
-
-solveRiemann :: System -> Double -> Double -> WaveFan
-solveRiemann sys uL uR = error "XXX"
-
-waveFanFromList :: [(ValueWave, Double, SeparatorWave)] -> Maybe WaveFan
-waveFanFromList [] = Nothing
-waveFanFromList ((vw, _, _):[])         = Just $ Wave vw
-waveFanFromList ((vw, speed, sep):more) =
-    case waveFanFromList more of
-        Nothing -> Nothing
-        Just rest' ->
-            Just $ Waves
-                { value = vw
-                , endSpeed = speed
-                , endingWave = sep
-                , rest = rest'
-                }
+atPoint :: WaveFan -> Double -> Double -> Mat
+atPoint wf x t = atSpeed wf (x/t)
 
 solutionForm :: System -> PotentialSolution -> Mat -> Mat
 solutionForm s u xt =
@@ -107,4 +90,7 @@ checkSolnOnCurve
     -> Mat
 checkSolnOnCurve c c' s u =
     I.adaptiveSimpsonLineIntegral accuracy c c' (solutionForm s u) 0 1
+
+solveRiemann :: System -> Double -> Double -> WaveFan
+solveRiemann sys uL uR = error "XXX"
 

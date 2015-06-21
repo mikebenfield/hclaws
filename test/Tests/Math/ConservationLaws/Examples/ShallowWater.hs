@@ -37,7 +37,7 @@ testCurves =
 
 curvesAndWaveFanCase msg (c, c') s wf =
     HU.testCase msg $
-        CL.checkSolnOnCurve c c' s (CL.evalWaveFanAtPoint wf) @?~ col [0,0]
+        CL.checkSolnOnCurve c c' s (CL.atPoint wf) @?~ col [0,0]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
