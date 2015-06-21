@@ -13,6 +13,8 @@ import qualified Data.Matrix as M
 import Math.LinearAlgebra
 import Math.ConservationLaws
 
+u pt = pt M.! (1,1)
+
 field :: CharField
 field =
     CharField
@@ -31,7 +33,7 @@ system =
         , flux = \u -> (1/2) *. u^2
         , dFlux = id
         , fields = [field]
-        , strengths = \ul ur -> ur-ul
+        , solveRiemann = \ul ur -> strengthsToFan ul [field] [u $ ur - ul]
         }
 
 solution1 :: WaveFan

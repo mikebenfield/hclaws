@@ -76,7 +76,7 @@ system =
         , flux = \m -> col [q m, (q m)**2 / (h m) + (h m)^2/2]
         , dFlux = \m -> fromLists [[0, 1], [(h m) - (v m)^2, 2 * (v m)]]
         , fields = [field1, field2]
-        , strengths = error "XXX"
+        , solveRiemann = error "XXX"
         }
 
 solution1 =

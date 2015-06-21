@@ -27,20 +27,23 @@ properties = testGroup "Properties"
     ]
 
 testCurves =
-    [ I.box_ (col [0, 1]) 1 2
-    , I.box_ (col [0, 0]) 2 2
-    , I.box_ (col [-5, 1]) 20 2
-    , I.circle_ (col [1, 1]) 1
-    , I.circle_ (col [0, 1]) 0.5
-    , I.circle_ (col [5,5]) 3
+    [ I.box_ (col [-5, 1]) 20 20
+    , I.box_ (col [-10, 2]) 50 3
+    , I.box_ (col [-30, 3]) 100 20
+    , I.circle_ (col [0, 5]) 4
+    , I.circle_ (col [-1, 2]) 1
+    , I.circle_ (col [1, 2]) 1
     ]
 
-curvesAndWaveFanCase msg (c, c') s wf =
-    HU.testCase msg $
-        CL.checkSolnOnCurve c c' s (CL.atPoint wf) @?~ col [0,0]
+testWaveFan :: CL.WaveFan -> String -> TestTree
+testWaveFan wf name =
+    HU.testCase name $ mapM_ intOnCurve testCurves
+  where
+    intOnCurve cc =
+        CL.integrateFanOnCurve cc SW.system wf @?~ col [0,0]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
-    map (\(c_, i) -> curvesAndWaveFanCase (show i) c_ SW.system SW.solution1) $
-        zip testCurves [1..]
+    [ testWaveFan SW.solution1 "manual solution 1"
+    ]
 

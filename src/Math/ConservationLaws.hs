@@ -4,8 +4,8 @@ module Math.ConservationLaws (
     Linearity(..),
     solutionForm,
     atSpeed, atPoint,
-    solveRiemann,
-    checkSolnOnCurve,
+    integrateFanOnCurve,
+    strengthsToFan,
 ) where
 
 import qualified Data.Matrix as M
@@ -37,7 +37,7 @@ data System =
         , flux :: MatField
         , dFlux :: MatField
         , fields :: [CharField]
-        , strengths :: Mat -> Mat -> Mat
+        , solveRiemann :: Mat -> Mat -> WaveFan
         }
 
 data Wave =
@@ -82,15 +82,41 @@ solutionForm s u xt =
 
 accuracy = 0.000001
 
-checkSolnOnCurve
-    :: Curve
-    -> Curve
-    -> System
-    -> PotentialSolution
-    -> Mat
-checkSolnOnCurve c c' s u =
-    I.adaptiveSimpsonLineIntegral accuracy c c' (solutionForm s u) 0 1
+integrateFanOnCurve :: (Curve, Curve) -> System -> WaveFan -> Mat
+integrateFanOnCurve (c, c') s wf =
+    I.adaptiveSimpsonLineIntegral accuracy c c' solutionForm' 0 1
+  where
+    solutionForm' =
+        solutionForm s $ atPoint wf
 
-solveRiemann :: System -> Double -> Double -> WaveFan
-solveRiemann sys uL uR = error "XXX"
+strengthsToFan' :: Mat -> [CharField] -> [Double] -> [Int] -> WaveFan
+strengthsToFan' u1 [] [] _ = Last u1
+strengthsToFan' _ [] _ _ = error "strengthsToFan: more strengths than fields"
+strengthsToFan' _ _ [] _ = error "strengthsToFan: more fields than strengths"
+strengthsToFan' _ _ _ [] = error "strengthsToFan: ???"
+strengthsToFan' u1 (f:fs) (0:ss) (i:is) = strengthsToFan' u1 fs ss is
+strengthsToFan' u1 (f:fs) (s:ss) (i:is) =
+    case linearity f of
+        LDG ->
+            Waves u1 (Shock (λ f u1) $ Just i) $
+                strengthsToFan' u2Rare fs ss is
+        GNL
+          | s > 0 ->
+                Waves u1 (Rarefaction (λ f u1) (λ f u2Rare) rCurveλ (Just i)) $
+                    strengthsToFan' u2Rare fs ss is
+          | otherwise ->
+                Waves u1 (Shock sSpeed $ Just i) $
+                    strengthsToFan' u2Shock fs ss is
+        _ -> error $ "strengthsToFan: " ++ show i ++
+                 "th field neither LDG nor GNL"
+  where
+    rCurve = rarefactionCurve f u1
+    sCurve = shockCurve f u1
+    u2Rare = rCurve s
+    u2Shock = sCurve s
+    sSpeed = shockSpeed f u1 u2Shock
+    rCurveλ λ' = rCurve (λ' - λ f u1)
+
+strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
+strengthsToFan u1 fs ss = strengthsToFan' u1 fs ss [1..]
 
