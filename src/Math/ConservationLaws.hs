@@ -2,6 +2,7 @@
 module Math.ConservationLaws (
     CharField(..), System(..), Wave(..), WaveFan(..),
     Linearity(..),
+    rarefactionWave, shockWave,
     solutionForm,
     atSpeed, atPoint,
     integrateFanOnCurve,
@@ -45,6 +46,23 @@ data Wave =
   | Shock Double (Maybe Int)
   | Front Double (Maybe Int)
 
+instance Show Wave where
+    show (Rarefaction a b _ (Just i)) =
+        "Rarefaction " ++ show a ++ " " ++ show b ++ " " ++ show i
+    show (Shock a (Just i)) =
+        "Shock " ++ show a ++ " " ++ show i
+    show _ = error "Can't happen"
+
+rarefactionWave :: CharField -> Int-> Mat -> Mat -> Wave
+rarefactionWave f i uL uR =
+    Rarefaction λuL (λ f uR) (\a -> rarefactionCurve f uL (a - λuL)) $ Just i
+  where
+    λuL = λ f uL
+
+shockWave :: CharField -> Int-> Mat -> Mat -> Wave
+shockWave f i uL uR =
+    Shock (shockSpeed f uL uR) $ Just i
+
 startSpeed :: Wave -> Double
 startSpeed (Rarefaction s _ _ _) = s
 startSpeed (Shock s _) = s
@@ -58,6 +76,7 @@ endSpeed (Front s _) = s
 data WaveFan =
     Waves Mat Wave WaveFan
   | Last Mat
+  deriving Show
 
 atSpeed :: WaveFan -> Double -> Mat
 atSpeed (Waves m (Rarefaction startSpeed_ endSpeed_ f _) wf) s

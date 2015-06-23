@@ -1,7 +1,7 @@
 
 module Math.ConservationLaws.Examples.Burgers (
     system,
-    solution1, solution2, solution3,
+    solution1, solution2, solution3, solution4, solution5,
     solutions,
     nonsolution,
 ) where
@@ -52,7 +52,11 @@ solution3 =
     Waves (col [0]) (Rarefaction 0 1 (\x -> col [x]) $ Just 1) $
     Last (col [1])
 
-solutions = [solution1, solution2, solution3]
+solution4 = solveRiemann system 1 4
+
+solution5 = solveRiemann system 1 (-2)
+
+solutions = [solution1, solution2, solution3, solution4, solution5]
 
 nonsolution :: WaveFan
 nonsolution =

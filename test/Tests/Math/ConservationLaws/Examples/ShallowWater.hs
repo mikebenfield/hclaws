@@ -37,13 +37,18 @@ testCurves =
 
 testWaveFan :: CL.WaveFan -> String -> TestTree
 testWaveFan wf name =
-    HU.testCase name $ mapM_ intOnCurve testCurves
+    HU.testCase name $ mapM_ intOnCurve [testCurves !! 1]
   where
     intOnCurve cc =
         CL.integrateFanOnCurve cc SW.system wf @?~ col [0,0]
 
+solution2 = CL.solveRiemann SW.system (col [1,1]) (col [2,2])
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
     [ testWaveFan SW.solution1 "manual solution 1"
+    , testWaveFan SW.solution2 "computed solution 2"
+    , testWaveFan SW.solution3 "computed solution 3"
+    , testWaveFan SW.solution4 "computed solution 4"
+    , testWaveFan SW.solution5 "computed solution 5"
     ]
 

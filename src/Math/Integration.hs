@@ -65,13 +65,13 @@ adaptiveSimpsonLineIntegral ε γ γ' ω a b =
 -- some useful curves in R^2
 
 x :: Mat -> Double
-x m = 
+x m =
     assert (dims == (2, 1)) (m M.! (1,1))
   where
     dims = (nrows m, ncols m)
 
 t :: Mat -> Double
-t m = 
+t m =
     assert (dims == (2, 1)) (m M.! (2,1))
   where
     dims = (nrows m, ncols m)
@@ -99,15 +99,14 @@ lineSegment_ :: Mat -> Mat -> (Double -> Mat, Double -> Mat)
 lineSegment_ p q = (lineSegment p q, lineSegment' p q)
 
 glueCurves :: [Double -> a] -> Double -> a
-glueCurves curves t =
-    curve t''
+glueCurves curves t
+  | flr >= fromIntegral len = last curves 1
+  | otherwise = (curves !! flr) t''
   where
     len = length curves
     t' = t * fromIntegral len
     flr = floor t'
     t'' = t' - (fromIntegral flr) :: Double
-    curve | flr >= fromIntegral len = last curves
-          | otherwise = curves !! flr
 
 box :: Mat -> Double -> Double -> Double -> Mat
 box lowerLeft width height =
@@ -129,8 +128,8 @@ box' :: Double -> Double -> Double -> Mat
 box' width height =
     glueCurves [\_ -> e1, \_ -> e2, \_ -> negate e1, \_ -> negate e2]
   where
-    e1 = col [width, 0] :: Mat
-    e2 = col [0, height]
+    e1 = col [4*width, 0] :: Mat
+    e2 = col [0, 4*height]
 
 box_ :: Mat -> Double -> Double -> (Double -> Mat, Double -> Mat)
 box_ lowerLeft width height = (box lowerLeft width height, box' width height)
