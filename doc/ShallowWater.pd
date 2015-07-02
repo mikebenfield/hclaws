@@ -1,0 +1,94 @@
+
+The Shallow Water equations are this system of two conservation laws:
+$$
+\begin{pmatrix}
+h \\
+q
+\end{pmatrix}_t +
+\begin{pmatrix}
+q \\
+\frac{q^2}{h} + \frac{h^2}{2}
+\end{pmatrix}_x = 0
+$$
+on the domain $h>0$. 
+
+The Jacobian of the flux is:
+$$
+\begin{pmatrix}
+0 & 1 \\
+h-\frac{q^2}{h^2} & \frac{2q}{h}
+\end{pmatrix} .
+$$
+
+The eigensystem and rarefaction curves are:
+$$\begin{align*}
+  R_1 &=
+  -\frac 2 3
+  \begin{pmatrix}
+    \sqrt h \\
+    \frac{q}{\sqrt h} - h
+  \end{pmatrix}, \;
+  &\mathcal R_1^a(h_0,q_0) &=
+  \begin{pmatrix}
+    (\sqrt{h_0} - \frac a 3)^2 \\
+    h\left(\frac 2 3 a + \frac{q_0}{h_0} \right)
+  \end{pmatrix}, \;
+  &\lambda_1 &= \frac{q-h^{3/2}}{h}, \\
+  R_2 &=
+  \frac 2 3
+  \begin{pmatrix}
+    \sqrt h \\
+    \frac{q}{\sqrt h} + h
+  \end{pmatrix}, \;
+  &\mathcal R_2^b(h_0,q_0) &=
+  \begin{pmatrix}
+    (\sqrt{h_0} + \frac b 3)^2 \\
+    h\left(\frac 2 3 b + \frac{q_0}{h_0} \right)
+  \end{pmatrix}, \;
+  &\lambda_2 &= \frac{q+h^{3/2}}{h} .
+\end{align*}$$
+Both fields are genuinely nonlinear. Here $R_i$ is scaled so that
+$\nabla_{R_i}\lambda_i=1$, and the rarefaction curve $\mathcal R_i$ is
+parametrized accordingly. 
+
+The shock curves are
+$$\begin{align*}
+  \mathcal S_1^a(h_0,q_0) =
+  \begin{pmatrix}
+    h_0-a \\
+    q_0\frac{h}{h_0} - \frac{h}{\sqrt 2}(h-h_0)\sqrt{\frac 1 h + \frac 1 {h_0}}
+  \end{pmatrix}, \;
+  \mathcal S_2^b(h_0,q_0) =
+  \begin{pmatrix}
+    h_0+b \\
+    q_0\frac{h}{h_0} + \frac{h}{\sqrt 2}(h-h_0)\sqrt{\frac 1 h + \frac 1 {h_0}}
+  \end{pmatrix}.
+\end{align*}$$
+These are not parametrized in any special way; they take negative parameters
+to give entropy shocks. 
+
+![Wave curves for the Shallow Water equation](ShallowWater.png)
+
+In the graphic, the point $(h_0,q_0)$ is at the intersection of the four
+curves. The blue curve is $\mathcal R_1$; the lighter orange is $\mathcal S_1$.
+The green curve is $\mathcal R_2$ and the darker orange curve is
+$\mathcal S_2$. 
+
+The functions $r_i$ and $s_i$ given here are constant along $i$ rarefaction
+or shock curves; they may be used to determine which region $(h_r,q_r)$ is
+in (see ShallowWater.hs):
+$$\begin{align*}
+  r_1 &= \frac{q+2h^{3/2}}{h}, \, 
+  &s_1 &= q_0\frac{h}{h_0} -
+        \frac{h}{\sqrt 2}(h-h_0)\sqrt{\frac 1 h + \frac 1 {h_0}} - q \\
+  r_2 &= \frac{q-2h^{3/2}}{h}, \,
+  &s_2 &= q_0\frac{h}{h_0} + 
+          \frac{h}{\sqrt 2}(h-h_0)\sqrt{\frac 1 h + \frac 1 {h_0}} - q .
+\end{align*}$$
+The region V is not accessible by traveling along a 1 wave curve followed by
+a 2 wave curve. To find the red curve delimiting region V, let
+$k = r_1(h_0,q_0)$. Then $q = kh-2h^{3/2}$ is a simple parametrization
+of $\mathcal R_1$ by $h$. At any such point $(h,q)$, we have
+$r_2 = k - 4 \sqrt h$. Sending $h\to 0$, we see that the curve is given by
+$r_2 = k$.
+
