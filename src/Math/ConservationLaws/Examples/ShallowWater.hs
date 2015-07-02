@@ -129,7 +129,7 @@ solveRiemann' uL uR
           Waves uM (shockWave field2 2 uM uR) $
           Last uR
   | otherwise =
-      error "ShallWater solveRiemann: can't happen"
+      error "ShallowWater solveRiemann: can't happen"
   where
     hL = h uL
     qL = q uL
