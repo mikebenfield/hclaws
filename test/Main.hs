@@ -5,6 +5,7 @@ import qualified Tests.Math.Integration
 import qualified Tests.Math.ConservationLaws
 import qualified Tests.Math.ConservationLaws.Examples.Burgers
 import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
+import qualified Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31
 
 main = defaultMain tests
 
@@ -14,5 +15,6 @@ tests = testGroup "Tests"
   , Tests.Math.ConservationLaws.tests
   , Tests.Math.ConservationLaws.Examples.Burgers.tests
   , Tests.Math.ConservationLaws.Examples.ShallowWater.tests
+  , Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31.tests
   ]
 

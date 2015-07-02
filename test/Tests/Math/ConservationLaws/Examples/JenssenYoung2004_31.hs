@@ -1,5 +1,5 @@
 
-module Tests.Math.ConservationLaws.Examples.ShallowWater (
+module Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31 (
     tests
 ) where
 
@@ -12,13 +12,13 @@ import Test.HUnitExtras
 import Math.LinearAlgebra
 
 import qualified Math.ConservationLaws as CL
-import qualified Math.ConservationLaws.Examples.ShallowWater as SW
+import qualified Math.ConservationLaws.Examples.JenssenYoung2004_31 as JY
 
 import qualified Math.Integration as I
 
 tests :: TestTree
 tests =
-    testGroup "Math.ConservationLaws.Examples.ShallowWater"
+    testGroup "Math.ConservationLaws.Examples.JenssenYoung2004_31"
         [properties, unitTests]
 
 properties :: TestTree
@@ -35,20 +35,17 @@ testCurves =
     , I.circle_ (col [1, 2]) 1
     ]
 
+lambda = 1
+
 testWaveFan :: CL.WaveFan -> String -> TestTree
 testWaveFan wf name =
-    HU.testCase name $ mapM_ intOnCurve testCurves
+    HU.testCase name $ mapM_ intOnCurve [testCurves !! 1]
   where
     intOnCurve cc =
-        CL.integrateFanOnCurve cc SW.system wf @?~ col [0,0]
+        CL.integrateFanOnCurve cc (JY.system 1) wf @?~ col [0,0,0]
 
-solution2 = CL.solveRiemann SW.system (col [1,1]) (col [2,2])
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
-    [ testWaveFan SW.solution1 "manual solution 1"
-    , testWaveFan SW.solution2 "computed solution 2"
-    , testWaveFan SW.solution3 "computed solution 3"
-    , testWaveFan SW.solution4 "computed solution 4"
-    , testWaveFan SW.solution5 "computed solution 5"
+    [
     ]
 
