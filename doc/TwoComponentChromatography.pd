@@ -1,0 +1,55 @@
+
+This is a $2\times 2$ system with flux given by
+$$F(u,v) =
+\begin{pmatrix}
+  \frac{k u}{1+u+v} \\
+  \frac{k v}{1+u+v}
+\end{pmatrix}$$
+in the domain $u>0,v>0$.
+
+It is given as equations (3) in a paper of Temple^[Temple, Blake. 1983. Systems
+of conservation laws with invariant submanifolds.]. (Although in that paper
+there is a factor of $k$ missing from the first equation.)
+
+We can calculate
+$$DF =
+\frac{k}{(1+u+v)^2}
+\begin{pmatrix}
+1+v & -u \\
+-v & 1+u
+\end{pmatrix}$$
+
+The eigensystem and rarefaction curves are:
+$$\begin{align*}
+  R_1 &=
+  -\frac{(1+u+v)^2}{2k(u+v)}
+  \begin{pmatrix}
+    u \\
+    v
+  \end{pmatrix}, \;
+  &\mathcal R_1^a(u_0,v_0) &=
+  \left( 1 + \frac{\sqrt{\frac k {a+k}}-1}{u_0+v_0} \right)
+  \begin{pmatrix}
+    u_0 \\
+    v_0
+  \end{pmatrix}, \;
+  &\lambda_1 &= \frac{k}{(1+u+v)^2} , \\
+  R_2 &=
+  \begin{pmatrix}
+    -1 \\
+    1
+  \end{pmatrix}, \;
+  &\mathcal R_2^b(u_0,v_0) &=
+  \begin{pmatrix}
+    u-b \\
+    v+b
+  \end{pmatrix}, \;
+  &\lambda_2 &= \frac{k}{1+u+v} .
+\end{align*}$$
+
+Since both characteristic fields are line fields, the shock curves
+coincide with the rarefaction curves. 
+
+The speed for a shock of the first family connecting $U_-$ and $U_+$
+is 
+$$\frac{k v u_-}{(1+u_-+v_-)(u_-v_+ + v_-(1+v_+))} . $$
