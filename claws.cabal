@@ -21,6 +21,7 @@ library
                        Math.LinearAlgebra, 
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.ShallowWater
+                       Math.ConservationLaws.Examples.TwoComponentChromatography
                        Math.ConservationLaws.Examples.JenssenYoung2004_31
   -- other-modules:       
   -- other-extensions:    
