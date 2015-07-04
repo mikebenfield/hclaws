@@ -1,17 +1,13 @@
 
 module Math.Integration (
-    simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral,
-    x, t,
-    circle, circle', circle_,
-    lineSegment, lineSegment', lineSegment_,
-    box, box', box_,
-    glueCurves
+    simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral
 ) where
 
 import Control.Exception.Base (assert)
 
 import Data.Matrix as M
 
+import qualified Math.Curves as C
 import Math.LinearAlgebra
 
 simpson' :: Mat -> Mat -> Mat -> Double -> Double -> Mat
@@ -51,115 +47,13 @@ adaptiveSimpson ε f a b =
 
 adaptiveSimpsonLineIntegral
     :: Double
-    -> (Double -> k)
-    -> (Double -> Mat)
-    -> (k -> Mat)
+    -> C.Curve
+    -> (Mat -> Mat)
     -> Double
     -> Double
     -> Mat
-adaptiveSimpsonLineIntegral ε γ γ' ω a b =
+adaptiveSimpsonLineIntegral ε γ ω a b =
     adaptiveSimpson ε f a b
   where
-    f t = (ω $ γ t) * γ' t
+    f t = (ω $ C.at γ t) * C.d γ t
 
--- some useful curves in R^2
-
-x :: Mat -> Double
-x m =
-    assert (dims == (2, 1)) (m M.! (1,1))
-  where
-    dims = (nrows m, ncols m)
-
-t :: Mat -> Double
-t m =
-    assert (dims == (2, 1)) (m M.! (2,1))
-  where
-    dims = (nrows m, ncols m)
-
-circle :: Mat -> Double -> Double -> Mat
-circle center radius t =
-    col [radius*cos (2*pi*t), radius*sin (2*pi*t)] + center
-
-circle' :: Double -> Double -> Mat
-circle' radius t =
-    col [-factor*sin (2*pi*t), factor*cos (2*pi*t)]
-  where
-    factor = 2*pi*radius
-
-circle_ :: Mat -> Double -> (Double -> Mat, Double -> Mat)
-circle_ center radius = (circle center radius, circle' radius)
-
-lineSegment :: Mat -> Mat -> Double -> Mat
-lineSegment p q t = scaleMatrix (1-t) p + scaleMatrix t q
-
-lineSegment' :: Mat -> Mat -> Double -> Mat
-lineSegment' p q _ = q - p
-
-lineSegment_ :: Mat -> Mat -> (Double -> Mat, Double -> Mat)
-lineSegment_ p q = (lineSegment p q, lineSegment' p q)
-
-glueCurves :: [Double -> a] -> Double -> a
-glueCurves curves t
-  | flr >= fromIntegral len = last curves 1
-  | otherwise = (curves !! flr) t''
-  where
-    len = length curves
-    t' = t * fromIntegral len
-    flr = floor t'
-    t'' = t' - (fromIntegral flr) :: Double
-
-box :: Mat -> Double -> Double -> Double -> Mat
-box lowerLeft width height =
-    glueCurves
-        [ lineSegment c1 c2
-        , lineSegment c2 c3
-        , lineSegment c3 c4
-        , lineSegment c4 c1
-        ]
-  where
-    e1 = col [width, 0]
-    e2 = col [0, height]
-    c1 = lowerLeft
-    c2 = lowerLeft + e1
-    c3 = c2 + e2
-    c4 = lowerLeft + e2
-
-box' :: Double -> Double -> Double -> Mat
-box' width height =
-    glueCurves [\_ -> e1, \_ -> e2, \_ -> negate e1, \_ -> negate e2]
-  where
-    e1 = col [4*width, 0] :: Mat
-    e2 = col [0, 4*height]
-
-box_ :: Mat -> Double -> Double -> (Double -> Mat, Double -> Mat)
-box_ lowerLeft width height = (box lowerLeft width height, box' width height)
-
----- γ is the curve we are integrating over
----- ω is a 1-form: interpret its components as the coefficients of dx^i
---trapezoidLineIntegral :: (Double -> Vector Double) -> (Vector Double -> Vector Double)
---                       -> Double -> Double -> Double
---trapezoidLineIntegral γ ω a b =
---  sum $ map ith [0..len-1]
---  where
---    m = (b+a)/2
---    γa = γ a
---    γb = γ b
---    ωa = ω $ γa
---    ωb = ω $ γb
---    ωm = ω $ γm
---    len = length ωa
---    --factor i = (γb ! i - γa ! i) / 6
---    --ith i = factor i * (ωa ! i + 4 * ωm ! i + ωb ! i)
---    ith i = (γb ! i - γa ! i) * (ωa ! i + ωb ! i) / 2
---
---adaptiveTrapezoidLineIntegral :: Double ->
---                                 (Double -> Vector Double) ->
---                                 (Vector Double -> Vector Double) ->
---                                 Double -> Double -> Double
---adaptiveTrapezoidLineIntegral ε γ ω a b =
---  if abs ((tac + tcb) - tab) / 15 < ε then
---    tac + tcb
---  else
---    adaptiveTrapezoidLineIntegral ε γ ω a c +
---    adaptiveTrapezoidLineIntegral ε γ ω c b
---

@@ -11,6 +11,7 @@ module Math.ConservationLaws (
 
 import qualified Data.Matrix as M
 
+import qualified Math.Curves as C
 import Math.LinearAlgebra
 import qualified Math.Integration as I
 
@@ -101,9 +102,9 @@ solutionForm s u xt =
 
 accuracy = 0.000001
 
-integrateFanOnCurve :: (Curve, Curve) -> System -> WaveFan -> Mat
-integrateFanOnCurve (c, c') s wf =
-    I.adaptiveSimpsonLineIntegral accuracy c c' solutionForm' 0 1
+integrateFanOnCurve :: C.Curve -> System -> WaveFan -> Mat
+integrateFanOnCurve c s wf =
+    I.adaptiveSimpsonLineIntegral accuracy c solutionForm' 0 1
   where
     solutionForm' =
         solutionForm s $ atPoint wf

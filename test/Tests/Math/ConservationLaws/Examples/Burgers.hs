@@ -14,6 +14,7 @@ import Math.LinearAlgebra
 import qualified Math.ConservationLaws as CL
 import qualified Math.ConservationLaws.Examples.Burgers as B
 
+import qualified Math.Curves as C
 import qualified Math.Integration as I
 
 tests :: TestTree
@@ -24,19 +25,13 @@ properties = testGroup "Properties"
     [
     ]
 
-c1 = I.lineSegment_ (col [-0.5, 0.5]) (col [1.5, 0.5])
-c2 = I.lineSegment_ (col [1.5, 0.5]) (col [1.5, 2.5])
-c3 = I.lineSegment_ (col [1.5, 2.5]) (col [-0.5, 2.5])
-c4 = I.lineSegment_ (col [-0.5, 2.5]) (col [-0.5, 0.5])
-c5 = (I.glueCurves [fst c1, fst c2], I.glueCurves [snd c1, snd c2])
-
 testCurves =
-    [ I.box_ (col [-5, 1]) 20 20
-    , I.box_ (col [-10, 2]) 50 3
-    , I.box_ (col [-30, 3]) 100 20
-    , I.circle_ (col [0, 5]) 4
-    , I.circle_ (col [-1, 2]) 1
-    , I.circle_ (col [1, 2]) 1
+    [ C.Box (col [-5, 1]) 20 20
+    , C.Box (col [-10, 2]) 50 3
+    , C.Box (col [-30, 3]) 100 20
+    , C.Circle (col [0, 5]) 4
+    , C.Circle (col [-1, 2]) 1
+    , C.Circle (col [1, 2]) 1
     ]
 
 testWaveFan :: CL.WaveFan -> String -> TestTree

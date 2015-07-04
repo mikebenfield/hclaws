@@ -18,6 +18,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Math.ConservationLaws, Math.Integration,
+                       Math.Curves,
                        Math.LinearAlgebra, 
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.ShallowWater

@@ -10,8 +10,9 @@ import qualified Test.Tasty.HUnit as HU
 
 import Test.HUnitExtras
 
-import Data.Matrix (fromLists)
+import Data.Matrix (fromLists, (!))
 
+import qualified Math.Curves as C
 import Math.LinearAlgebra
 
 import qualified Math.Integration as I
@@ -25,11 +26,11 @@ properties = testGroup "Properties"
     ]
 
 form1 m = row [1, 1]
-form2 m = row [I.t m, I.x m]
-form3 m = fromLists [[1, 1], [I.t m, I.x m]]
-(segment1, segment1') = I.lineSegment_ (col [0, 0]) (col [2, 3])
-(circle1, circle1') = I.circle_ (col [1, 1]) 1
-(box1, box1') = I.box_ (col [0, 0]) 1 3
+form2 m = row [m ! (2,1), m ! (1,1)]
+form3 m = fromLists [[1, 1], [m ! (2,1), m ! (1,1)]]
+segment1 = C.Segment (col [0,0]) (col [2,3])
+circle1 = C.Circle (col [1,1]) 1
+box1 = C.Box (col [0,0]) 1 3
 
 acc = 0.00001
 
@@ -44,25 +45,25 @@ unitTests = testGroup "Unit Tests"
     , HU.testCase "adaptiveSimpson 2" $
           I.adaptiveSimpson acc (\x -> col [x, x^2]) 0 1 @?~ col [1/2, 1/3]
     , HU.testCase "adaptiveSimpsonLineIntegral 1" $
-          I.adaptiveSimpsonLineIntegral 
-              acc segment1 segment1' form1 0 1 @?~ col [5]
+          I.adaptiveSimpsonLineIntegral
+              acc segment1 form1 0 1 @?~ col [5]
     , HU.testCase "adaptiveSimpsonLineIntegral 2" $
-          I.adaptiveSimpsonLineIntegral 
-              acc segment1 segment1' form2 0 1 @?~ col [6]
+          I.adaptiveSimpsonLineIntegral
+              acc segment1 form2 0 1 @?~ col [6]
     , HU.testCase "adaptiveSimpsonLineIntegral 3" $
-          I.adaptiveSimpsonLineIntegral 
-              acc circle1 circle1' form1 0 1 @?~ col [0]
+          I.adaptiveSimpsonLineIntegral
+              acc circle1 form1 0 1 @?~ col [0]
     , HU.testCase "adaptiveSimpsonLineIntegral 4" $
-          I.adaptiveSimpsonLineIntegral 
-              acc circle1 circle1' form2 0 1 @?~ col [0]
+          I.adaptiveSimpsonLineIntegral
+              acc circle1 form2 0 1 @?~ col [0]
     , HU.testCase "adaptiveSimpsonLineIntegral 5" $
-          I.adaptiveSimpsonLineIntegral 
-              acc box1 box1' form1 0 1 @?~ col [0]
+          I.adaptiveSimpsonLineIntegral
+              acc box1 form1 0 1 @?~ col [0]
     , HU.testCase "adaptiveSimpsonLineIntegral 6" $
-          I.adaptiveSimpsonLineIntegral 
-              acc box1 box1' form2 0 1 @?~ col [0]
+          I.adaptiveSimpsonLineIntegral
+              acc box1 form2 0 1 @?~ col [0]
     , HU.testCase "adaptiveSimpsonLineIntegral 7" $
-          I.adaptiveSimpsonLineIntegral 
-              acc box1 box1' form3 0 1 @?~ col [0, 0]
+          I.adaptiveSimpsonLineIntegral
+              acc box1 form3 0 1 @?~ col [0, 0]
     ]
 
