@@ -8,7 +8,7 @@ module Math.ConservationLaws.Separated (
 
     interweave, separated, length, firstVal, lastVal,
     before, maybeBefore, unsafeBefore, after, maybeAfter, unsafeAfter,
-    (!), (!?), unsafeIndex, collapseSeparators
+    (!), (!?), unsafeIndex, collapseSeps
 ) where
 
 import Prelude hiding (length)
@@ -115,39 +115,23 @@ s !? i = seps s G.!? i
 unsafeIndex :: SeparatedC s => s -> Int -> Sep s
 unsafeIndex s i = G.unsafeIndex (seps s) i
 
-collapseSeparators
+collapseSeps
     :: (SeparatedC s, SeparatedC t, Val s ~ Val t)
     => s
     -> (Int -> (Int, Sep t))
     -> t
-collapseSeparators s f = runST $ do
-    newSeps <- GM.new $ length s
-    newVals <- GM.new $ length s + 1
-    (_, lenNewSeps) <- whileDo
-        (\(iOldSeps, iNewSeps) ->
-            let (iOldSepsUpdate, newSep) = f iOldSeps
-                iOldSepsUpdate' = clamp iOldSepsUpdate iOldSeps (length s - 1)
-            in do
-            GM.write newSeps iNewSeps newSep
-            GM.write newVals iNewSeps (before s iOldSeps)
-            return (iOldSepsUpdate' + 1, iNewSeps + 1)
-        )
-        (\(iOldSeps, _) -> iOldSeps < length s)
-        (0, 0)
-    GM.write newVals lenNewSeps (lastVal s)
-    frozenNewSeps <- G.freeze $ GM.slice 0 lenNewSeps newSeps 
-    frozenNewVals <- G.freeze $ GM.slice 0 (lenNewSeps + 1) newVals 
-    return $ unsafeCreate (G.force frozenNewVals) (G.force frozenNewSeps)
-
-whileDo :: Monad m => (a -> m a) -> (a -> Bool) -> a -> m a
-whileDo action pred init =
-    if pred init
-       then action init >>= whileDo action pred
-       else return init
-
-clamp :: Int -> Int -> Int -> Int
-clamp val lower upper
-  | val < lower = lower
-  | val > upper = upper
-  | otherwise = val
+collapseSeps s f =
+    unsafeCreate newVals newSeps
+  where
+    len = length s
+    g i
+      | i >= len = Nothing
+      | otherwise =
+            let (newI, newSep) = f i in
+            Just ((before s i, newSep), 1 + max newI i)
+    transformed = V.unfoldrN len g 0
+    newSeps = G.generate (G.length transformed) (snd . (transformed G.!))
+    newVals = G.snoc
+        (G.generate (G.length transformed) (fst . (transformed G.!)))
+        (lastVal s)
 
