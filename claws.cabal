@@ -20,6 +20,7 @@ library
   exposed-modules:     Math.ConservationLaws, Math.Integration,
                        Math.Curves,
                        Math.LinearAlgebra, 
+                       Math.ConservationLaws.Separated,
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.ShallowWater
                        Math.ConservationLaws.Examples.TwoComponentChromatography
@@ -39,6 +40,7 @@ executable claws-test
                        tasty-quickcheck >=0.8,
                        tasty-smallcheck >=0.8,
                        matrix,
+                       vector,
                        claws
   main-is:             Main.hs
   hs-source-dirs:      test
