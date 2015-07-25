@@ -1,14 +1,21 @@
 
 module Math.Fan (
     Fan(..),
+    iLength,
     indexI,
     safeIndexI,
     unsafeIndexI,
     indexO,
     safeIndexO,
+    unsafeIndexO,
+    lastO,
+    firstO,
     findOuterAt,
     findOuterAtLinear,
-    findOuterAtBinary
+    findOuterAtBinary,
+    findIndexAt,
+    findIndexAtLinear,
+    findIndexAtBinary
 ) where
 
 import Data.Bits (shiftR)
@@ -17,6 +24,9 @@ import Data.Vector as V
 
 data Fan outer inner = Fan (V.Vector (outer, inner)) outer
     deriving (Eq)
+
+iLength :: Fan outer inner -> Int
+iLength (Fan vec _) = V.length vec
 
 indexI :: Fan outer inner -> Int -> inner
 indexI (Fan vec _) i = snd $ vec V.! i
@@ -42,41 +52,57 @@ unsafeIndexO (Fan vec last) i
     | i == V.length vec = last
     | otherwise = fst $ vec `unsafeIndex` i
 
+lastO :: Fan outer inner -> outer
+lastO (Fan _ last) = last
+
+firstO :: Fan outer inner -> outer
+firstO (Fan vec _) | V.length vec > 0 = fst $ vec V.! 0
+firstO (Fan _ last) = last
+
 cons :: (outer, inner) -> Fan outer inner -> Fan outer inner
 cons oi (Fan vec last) = Fan (V.cons oi vec) last
 
 snoc :: Fan outer inner -> (inner, outer) -> Fan outer inner
 snoc (Fan vec last) (i, o) = Fan (V.snoc vec (last, i)) o
 
+findOuterAt :: (inner -> Ordering) -> Fan outer inner -> outer
+findOuterAt compare fan = indexO fan $ findIndexAt compare fan
+
+findOuterAtLinear :: (inner -> Ordering) -> Fan outer inner -> outer
+findOuterAtLinear compare fan = indexO fan $ findIndexAtLinear compare fan
+
+findOuterAtBinary :: (inner -> Ordering) -> Fan outer inner -> outer
+findOuterAtBinary compare fan = indexO fan $ findIndexAtBinary compare fan
+
 -- performance note: of course findOuterAtLinear is faster for small
 -- Vectors (say up to about 20 elements when comparing Ints).
 -- But checking for length and then choosing Linear or Binary is almost always
 -- slower than just using Binary anyway
-findOuterAt :: (inner -> Ordering) -> Fan outer inner -> outer
-findOuterAt = findOuterAtBinary
+findIndexAt :: (inner -> Ordering) -> Fan outer inner -> Int
+findIndexAt = findIndexAtBinary
 
 -- performance note: I experimented with first checking if 
 -- compare (V.last vec) == GT
 -- That way we would not have to check bounds while iterating through vec.
 -- But that is somehow *slower*.
-findOuterAtLinear :: (inner -> Ordering) -> Fan outer inner -> outer
-findOuterAtLinear compare (Fan vec last) =
-    case V.find (\(_, i) -> not $ compare i == GT) vec of
-        Just (val, _) -> val
-        Nothing -> last
+findIndexAtLinear :: (inner -> Ordering) -> Fan outer inner -> Int
+findIndexAtLinear compare (Fan vec last) =
+    case V.findIndex (\(_, i) -> not $ compare i == GT) vec of
+        Just j -> j
+        Nothing -> V.length vec
 
-findOuterAtBinary :: (inner -> Ordering) -> Fan outer inner -> outer
-findOuterAtBinary compare (Fan vec last) =
+findIndexAtBinary :: (inner -> Ordering) -> Fan outer inner -> Int
+findIndexAtBinary compare (Fan vec last) =
     loop 0 (V.length vec)
   where
     loop lower upper
       | lower >= upper =
           if lower >= V.length vec
-             then last
-             else fst $ vec V.! lower
+             then V.length vec
+             else lower
       | otherwise = case compare (snd $ V.unsafeIndex vec k) of
             LT -> loop lower k
             GT -> loop (k+1) upper
-            EQ -> fst $ V.unsafeIndex vec k
+            EQ -> k
       where k = shiftR (upper + lower) 1
 

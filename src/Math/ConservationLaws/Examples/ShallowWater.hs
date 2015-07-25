@@ -163,7 +163,7 @@ system =
 
 solution1 :: WaveFan
 solution1 =
-    Fan [(pt1, SWave Shock {speed = speed', sFamily = 1})] pt2
+    Fan [(pt1, SWave Shock {speed = speed', sFamily = 0})] pt2
   where
     pt1 = col [1,1]
     pt2 = shock1 pt1 (-1)

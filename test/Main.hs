@@ -2,6 +2,7 @@
 import Test.Tasty
 
 import qualified Tests.Math.ConservationLaws
+import qualified Tests.Math.ConservationLaws.FrontTracking
 import qualified Tests.Math.ConservationLaws.Examples.Burgers
 import qualified Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31
 import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
@@ -18,6 +19,7 @@ tests = testGroup "Tests"
   , Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31.tests
   , Tests.Math.ConservationLaws.Examples.ShallowWater.tests
   , Tests.Math.ConservationLaws.Examples.TwoComponentChromatography.tests
+  , Tests.Math.ConservationLaws.FrontTracking.tests
   , Tests.Math.ConservationLaws.tests
   , Tests.Math.Curves.tests
   , Tests.Math.Fan.tests

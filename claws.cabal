@@ -21,6 +21,7 @@ library
                        Math.Curves,
                        Math.Fan
                        Math.LinearAlgebra, 
+                       Math.ConservationLaws.FrontTracking,
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.ShallowWater
                        Math.ConservationLaws.Examples.TwoComponentChromatography
@@ -29,7 +30,8 @@ library
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
                        vector >=0.11,
-                       matrix
+                       matrix,
+                       containers
   hs-source-dirs:      src
   default-language:    Haskell2010
   default-extensions:  OverloadedLists
@@ -47,6 +49,7 @@ executable claws-test
                        tasty-th,
                        matrix,
                        vector,
+                       containers,
                        claws
   main-is:             Main.hs
   hs-source-dirs:      test

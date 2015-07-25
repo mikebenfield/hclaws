@@ -14,8 +14,8 @@ module Math.ConservationLaws (
 
 import Prelude hiding (length)
 
-import qualified Data.Vector as V
 import qualified Data.Matrix as M
+import qualified Data.Vector as V
 
 import Math.LinearAlgebra
 import Math.Fan
@@ -129,7 +129,7 @@ strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
 strengthsToFan uL fields strengths =
     Fan (V.generate (V.length shifted) unshift) (fst $ V.last shifted)
   where
-    shifted = V.unfoldr strengthsToFan_ (uL, fields, strengths, [1..])
+    shifted = V.unfoldr strengthsToFan_ (uL, fields, strengths, [0..])
     unshift 0 = (uL, snd $ V.unsafeIndex shifted 0)
     unshift i =
         (fst $ V.unsafeIndex shifted (i-1), snd $ V.unsafeIndex shifted i)

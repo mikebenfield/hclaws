@@ -39,12 +39,12 @@ system =
 
 solution1 :: WaveFan
 solution1 =
-    Fan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 0
+    Fan [(1, SWave Shock {speed = 0.5, sFamily = 0})] 0
 
 -- this is not an entropy solution
 solution2 :: WaveFan
 solution2 =
-    Fan [(0, SWave Shock {speed = 0.5, sFamily = 1})] 1
+    Fan [(0, SWave Shock {speed = 0.5, sFamily = 0})] 1
 
 solution3 :: WaveFan
 solution3 =
@@ -55,7 +55,7 @@ solution3 =
             { speedL = 0
             , speedR = 1
             , function = (\x -> col [x])
-            , rFamily = 1
+            , rFamily = 0
             }
 
 solution4 = solveRiemann system 1 4
@@ -67,5 +67,5 @@ solutions = [solution1, solution2, solution3, solution4, solution5]
 
 nonsolution :: WaveFan
 nonsolution =
-    Fan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 2
+    Fan [(1, SWave Shock {speed = 0.5, sFamily = 0})] 2
 
