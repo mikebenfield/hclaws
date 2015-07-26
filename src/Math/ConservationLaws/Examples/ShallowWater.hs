@@ -1,11 +1,11 @@
 
+{-# LANGUAGE OverloadedLists #-}
+
 module Math.ConservationLaws.Examples.ShallowWater (
     system,
     solution1,
     solution2, solution3, solution4, solution5,
 ) where
-
-import Data.Maybe (fromJust)
 
 import Data.Matrix ((!), fromLists)
 
@@ -74,63 +74,58 @@ newton1 f f' x0 =
     x0 - (f x0) / (f' x0)
 
 newtonN f f' x0 0 = x0
-newtonN f f' x0 n = newtonN f f' (newton1 f f' x0) $ n-1
+newtonN f f' x0 n = newtonN f f' (newton1 f f' x0) (n-1)
 
+solveRiemann' :: Mat -> Mat -> WaveFan
 solveRiemann' uL uR
-  | hL <= 0 || hR <= 0 || r2 uR >= r1 uL  -- region V or out of domain
-        = error "ShallowWater solveRiemann: out of domain"
-  | uL == uR
-        = Last uL
-  | r1 uR == r1 uL && hR < hL -- along R1
-        = Waves uL (rarefactionWave field1 1 uL uR) $ Last uR
-  | r2 uR == r2 uL && hR > hL -- along R2
-        = Waves uL (rarefactionWave field2 2 uL uR) $ Last uR
-  | s1 uR == s1 uL && hR > hL -- along S1
-        = Waves uL (shockWave field1 1 uL uR) $ Last uR
-  | s2 uR == s2 uL && hR < hL -- along S2
-        = Waves uL (shockWave field2 2 uL uR) $ Last uR
-  | r2 uR < r2 uL && s1 uR > s1 uL -- region I, S1.R2
-        = let
-              hM = newtonN (f hR hL vR vL) (f' hR hL) ((hL+hR)/2) 50
-              qM = hM * (vL - (1 / sqrt 2) * (hM-hL) * c hM hL)
-              uM = col [hM, qM]
-          in
-          Waves uL (shockWave field1 1 uL uM) $
-          Waves uM (rarefactionWave field2 2 uM uR) $
-          Last uR
-  | r1 uR > r1 uL && r2 uR > r2 uL -- region II, R1.R2
-        = let
-              hM = ((2 * (sqrt hR + sqrt hL) - vR + vL) / 4)^2
-              qM = (r1 uL) * hM - 2 * hM**1.5
-              uM = col [hM, qM]
-          in
-          Waves uL (rarefactionWave field1 1 uL uM) $
-          Waves uM (rarefactionWave field2 2 uM uR) $
-          Last uR
-  | r1 uR < r1 uL && s2 uR > s2 uL -- region III, R1.S2
-        = let
-              -- the eqn that determines hM in region III is the same
-              -- as that for region I, but with the roles of uL, uR
-              -- reversed
-              hM = newtonN (f hL hR vL vR) (f' hL hR) ((hL+hR)/2) 50
-              qM = (r1 uL) * hM - 2 * hM**1.5
-              uM = col [hM, qM]
-          in
-          Waves uL (rarefactionWave field1 1 uL uM) $
-          Waves uM (shockWave field2 2 uM uR) $
-          Last uR
-  | s1 uR < s1 uL && s2 uR < s2 uL -- region IV, S1.S2
-        = let
-              hM = newtonN g g' ((hL+hR)/2) 50
-              qM = hM * (vL - (hM-hL) * c hM hL / sqrt 2)
-              uM = col [hM, qM]
-          in
-          Waves uL (shockWave field1 1 uL uM) $
-          Waves uM (shockWave field2 2 uM uR) $
-          Last uR
+  | hL <= 0 || hR <= 0 || r2 uR >= r1 uL = -- region V or out of domain
+    error "ShallowWater solveRiemann: out of domain"
+  | uL == uR = WaveFan [] uL
+  | r1 uR == r1 uL && hR < hL = -- along R1
+    WaveFan [(uL, rarefactionWave field1 1 uL uR)] uR
+  | r2 uR == r2 uL && hR > hL = -- along R2
+    WaveFan [(uL, rarefactionWave field2 2 uL uR)] uR
+  | s1 uR == s1 uL && hR > hL = -- along S1
+    WaveFan [(uL, shockWave field1 1 uL uR)] uR
+  | s2 uR == s2 uL && hR < hL = -- along S2
+    WaveFan [(uL, shockWave field2 2 uL uR)] uR
+  | r2 uR < r2 uL && s1 uR > s1 uL = -- region I, S1.R2
+    let hM = newtonN (f hR hL vR vL) (f' hR hL) ((hL+hR)/2) 50
+        qM = hM * (vL - (1 / sqrt 2) * (hM-hL) * c hM hL)
+        uM = col [hM, qM]
+    in
+    waveFan uM shockWave rarefactionWave
+  | r1 uR > r1 uL && r2 uR > r2 uL = -- region II, R1.R2
+    let
+        hM = ((2 * (sqrt hR + sqrt hL) - vR + vL) / 4)^2
+        qM = (r1 uL) * hM - 2 * hM**1.5
+        uM = col [hM, qM]
+    in
+    waveFan uM rarefactionWave rarefactionWave
+  | r1 uR < r1 uL && s2 uR > s2 uL = -- region III, R1.S2
+    let
+        -- the eqn that determines hM in region III is the same
+        -- as that for region I, but with the roles of uL, uR
+        -- reversed
+        hM = newtonN (f hL hR vL vR) (f' hL hR) ((hL+hR)/2) 50
+        qM = (r1 uL) * hM - 2 * hM**1.5
+        uM = col [hM, qM]
+    in
+    waveFan uM rarefactionWave shockWave
+  | s1 uR < s1 uL && s2 uR < s2 uL = -- region IV, S1.S2
+    let hM = newtonN g g' ((hL+hR)/2) 50
+        qM = hM * (vL - (hM-hL) * c hM hL / sqrt 2)
+        uM = col [hM, qM]
+    in
+    waveFan uM shockWave shockWave
   | otherwise =
       error "ShallowWater solveRiemann: can't happen"
   where
+    waveFan :: Mat -> (CharField -> Int -> Mat -> Mat -> Wave)
+            -> (CharField -> Int -> Mat -> Mat -> Wave)
+            -> WaveFan
+    waveFan uM waveA waveB =
+        WaveFan [(uL, waveA field1 1 uL uM), (uM, waveB field2 2 uM uR)] uR
     hL = h uL
     qL = q uL
     hR = h uR
@@ -167,13 +162,13 @@ system =
         , solveRiemann = solveRiemann'
         }
 
+solution1 :: WaveFan
 solution1 =
-    Waves pt1 (Shock speed $ Just 1) $
-    Last pt2
+    WaveFan [(pt1, SWave Shock {speed = speed', sFamily = 1})] pt2
   where
     pt1 = col [1,1]
     pt2 = shock1 pt1 (-1)
-    speed = speed1 pt1 pt2
+    speed' = speed1 pt1 pt2
 
 solution2 = solveRiemann system (col [1,1]) (col [2,2])
 solution3 = solveRiemann system (col [1,1]) (col [1,2])

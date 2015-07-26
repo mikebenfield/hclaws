@@ -1,18 +1,26 @@
 
+{-# LANGUAGE RecordWildCards #-}
+
 module Math.ConservationLaws (
     CharField(..), System(..), Wave(..), WaveFan(..),
+    Rarefaction(..), Shock(..),
     Linearity(..),
-    rarefactionWave, shockWave,
+    rarefactionWave,
+    shockWave,
     solutionForm,
-    atSpeed, atPoint,
+    atSpeed,
+    atPoint,
     integrateFanOnCurve,
     strengthsToFan,
 ) where
 
+import Prelude hiding (length)
+
+import qualified Data.Vector as V
 import qualified Data.Matrix as M
 
-import qualified Math.Curves as C
 import Math.LinearAlgebra
+import qualified Math.Curves as C
 import qualified Math.Integration as I
 
 type MatField = Mat -> Mat
@@ -22,6 +30,7 @@ type BasePointCurve = Mat -> Curve
 type PotentialSolution = Double -> Double -> Mat
 
 data Linearity = GNL | LDG | Neither
+    deriving (Eq, Show)
 
 data CharField =
     CharField
@@ -42,59 +51,66 @@ data System =
         , solveRiemann :: Mat -> Mat -> WaveFan
         }
 
-data Wave =
-    Rarefaction Double Double (Double -> Mat) (Maybe Int)
-  | Shock Double (Maybe Int)
-  | Front Double (Maybe Int)
+data Rarefaction =
+    Rarefaction
+        { speedL :: Double
+        , speedR :: Double
+        , function :: Double -> Mat
+        , rFamily :: Int
+        }
 
-instance Show Wave where
-    show (Rarefaction a b _ (Just i)) =
-        "Rarefaction " ++ show a ++ " " ++ show b ++ " " ++ show i
-    show (Shock a (Just i)) =
-        "Shock " ++ show a ++ " " ++ show i
-    show _ = error "Can't happen"
+instance Show Rarefaction where
+    show Rarefaction{..} =
+        "Rarefaction {speedL = " ++ show speedL ++
+            ", speedR = " ++ show speedR ++
+            ", rFamily = " ++ show rFamily ++ "}"
 
-rarefactionWave :: CharField -> Int-> Mat -> Mat -> Wave
-rarefactionWave f i uL uR =
-    Rarefaction λuL (λ f uR) (\a -> rarefactionCurve f uL (a - λuL)) $ Just i
-  where
-    λuL = λ f uL
+data Shock =
+    Shock
+        { speed :: Double
+        , sFamily :: Int
+        } deriving Show
 
-shockWave :: CharField -> Int-> Mat -> Mat -> Wave
-shockWave f i uL uR =
-    Shock (shockSpeed f uL uR) $ Just i
+data Wave = RWave Rarefaction | SWave Shock
+    deriving Show
 
-startSpeed :: Wave -> Double
-startSpeed (Rarefaction s _ _ _) = s
-startSpeed (Shock s _) = s
-startSpeed (Front s _) = s
+fastestSpeed :: Wave -> Double
+fastestSpeed (RWave Rarefaction{..}) = speedR
+fastestSpeed (SWave Shock{..}) = speed
 
-endSpeed :: Wave -> Double
-endSpeed (Rarefaction _ s _ _) = s
-endSpeed (Shock s _) = s
-endSpeed (Front s _) = s
+slowestSpeed :: Wave -> Double
+slowestSpeed (RWave Rarefaction{..}) = speedL
+slowestSpeed (SWave Shock{..}) = speed
 
-data WaveFan =
-    Waves Mat Wave WaveFan
-  | Last Mat
-  deriving Show
+rarefactionWave :: CharField -> Int -> Mat -> Mat -> Wave
+rarefactionWave field familyI uL uR =
+    RWave Rarefaction
+        { speedL = λ field uL
+        , speedR = λ field uR
+        , function = \s -> rarefactionCurve field uL (s - λ field uL)
+        , rFamily = familyI
+        }
+
+shockWave :: CharField -> Int -> Mat -> Mat -> Wave
+shockWave field familyI uL uR =
+    SWave Shock {speed = shockSpeed field uL uR, sFamily = familyI}
+
+data WaveFan = WaveFan (V.Vector (Mat, Wave)) Mat
 
 atSpeed :: WaveFan -> Double -> Mat
-atSpeed (Waves m (Rarefaction startSpeed_ endSpeed_ f _) wf) s
-  | s <= startSpeed_ = m
-  | s <= endSpeed_ = f s
-  | otherwise = atSpeed wf s
-atSpeed (Waves m w wf) s
-  | s <= startSpeed w = m
-  | otherwise = atSpeed wf s
-atSpeed (Last m) _ = m
+atSpeed (WaveFan v last) speed =
+    case V.find (\(_, wave) -> speed <= fastestSpeed wave) v of
+        Nothing -> last
+        Just (_, RWave Rarefaction{..})
+            | speed > speedL -> function speed
+        Just (value, _) -> value
 
 atPoint :: WaveFan -> Double -> Double -> Mat
 atPoint wf x t = atSpeed wf (x/t)
 
 solutionForm :: System -> PotentialSolution -> Mat -> Mat
 solutionForm s u xt =
-    uxt M.<|> negate (flux s $ uxt)
+    uxt M.<|> negate (flux s uxt)
   where
     x = xt M.! (1, 1)
     t = xt M.! (2, 1)
@@ -109,34 +125,30 @@ integrateFanOnCurve c s wf =
     solutionForm' =
         solutionForm s $ atPoint wf
 
-strengthsToFan' :: Mat -> [CharField] -> [Double] -> [Int] -> WaveFan
-strengthsToFan' u1 [] [] _ = Last u1
-strengthsToFan' _ [] _ _ = error "strengthsToFan: more strengths than fields"
-strengthsToFan' _ _ [] _ = error "strengthsToFan: more fields than strengths"
-strengthsToFan' _ _ _ [] = error "strengthsToFan: ???"
-strengthsToFan' u1 (f:fs) (0:ss) (i:is) = strengthsToFan' u1 fs ss is
-strengthsToFan' u1 (f:fs) (s:ss) (i:is) =
-    case linearity f of
-        LDG ->
-            Waves u1 (Shock (λ f u1) $ Just i) $
-                strengthsToFan' u2Rare fs ss is
-        GNL
-          | s > 0 ->
-                Waves u1 (Rarefaction (λ f u1) (λ f u2Rare) rCurveλ (Just i)) $
-                    strengthsToFan' u2Rare fs ss is
-          | otherwise ->
-                Waves u1 (Shock sSpeed $ Just i) $
-                    strengthsToFan' u2Shock fs ss is
-        _ -> error $ "strengthsToFan: " ++ show i ++
-                 "th field neither LDG nor GNL"
-  where
-    rCurve = rarefactionCurve f u1
-    sCurve = shockCurve f u1
-    u2Rare = rCurve s
-    u2Shock = sCurve s
-    sSpeed = shockSpeed f u1 u2Shock
-    rCurveλ λ' = rCurve (λ' - λ f u1)
-
 strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
-strengthsToFan u1 fs ss = strengthsToFan' u1 fs ss [1..]
+strengthsToFan uL fields strengths =
+    WaveFan (V.generate (V.length shifted) unshift) (fst $ V.last shifted)
+  where
+    shifted = V.unfoldr strengthsToFan_ (uL, fields, strengths, [1..])
+    unshift 0 = (uL, snd $ V.unsafeIndex shifted 0)
+    unshift i =
+        (fst $ V.unsafeIndex shifted (i-1), snd $ V.unsafeIndex shifted i)
+
+strengthsToFan_ (_, [], [], _) = Nothing
+strengthsToFan_ (uL, _:fs, 0:ss, _:is) = strengthsToFan_ (uL, fs, ss, is)
+strengthsToFan_ (uL, f:fs, s:ss, i:is) =
+    if linearity f == LDG || s < 0 then
+        Just
+            ( (u2Shock, shockWave f i uL u2Shock)
+            , (u2Shock, fs, ss, is)
+            )
+    else
+        Just
+            ( (u2Rare, rarefactionWave f i uL u2Rare)
+            , (u2Rare, fs, ss, is)
+            )
+  where
+    u2Rare = rarefactionCurve f uL s
+    u2Shock = shockCurve f uL s
+strengthsToFan_ _ = error "strengthsToFan"
 

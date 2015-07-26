@@ -1,4 +1,6 @@
 
+{-# LANGUAGE OverloadedLists #-}
+
 module Math.ConservationLaws.Examples.Burgers (
     system,
     solution1, solution2, solution3, solution4, solution5,
@@ -38,28 +40,33 @@ system =
 
 solution1 :: WaveFan
 solution1 =
-    Waves (col [1]) (Shock 0.5 $ Just 1) $
-    Last (col [0])
+    WaveFan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 0
 
 -- this is not an entropy solution
 solution2 :: WaveFan
 solution2 =
-    Waves (col [0]) (Shock 0.5 $ Just 1) $
-    Last (col [1])
+    WaveFan [(0, SWave Shock {speed = 0.5, sFamily = 1})] 1
 
 solution3 :: WaveFan
 solution3 =
-    Waves (col [0]) (Rarefaction 0 1 (\x -> col [x]) $ Just 1) $
-    Last (col [1])
+    WaveFan [(0, wave)] 1
+  where
+    wave =
+        RWave Rarefaction
+            { speedL = 0
+            , speedR = 1
+            , function = (\x -> col [x])
+            , rFamily = 1
+            }
 
 solution4 = solveRiemann system 1 4
 
 solution5 = solveRiemann system 1 (-2)
 
+solutions :: [WaveFan]
 solutions = [solution1, solution2, solution3, solution4, solution5]
 
 nonsolution :: WaveFan
 nonsolution =
-    Waves (col [1]) (Shock 0.5 $ Just 1) $
-    Last (col [2])
+    WaveFan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 2
 
