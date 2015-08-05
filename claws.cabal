@@ -19,6 +19,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Math.ConservationLaws, Math.Integration,
                        Math.Curves,
+                       Math.Fan
                        Math.LinearAlgebra, 
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.ShallowWater
@@ -27,10 +28,11 @@ library
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
-                       vector >= 0.11, 
+                       vector >=0.11,
                        matrix
   hs-source-dirs:      src
   default-language:    Haskell2010
+  ghc-options:         -O2
 
 executable claws-test
   build-depends:       base >=4.7 && <4.8,
@@ -38,10 +40,21 @@ executable claws-test
                        tasty-hunit >=0.9,
                        tasty-quickcheck >=0.8,
                        tasty-smallcheck >=0.8,
+                       tasty-th,
                        matrix,
                        vector,
                        claws
   main-is:             Main.hs
   hs-source-dirs:      test
   default-language:    Haskell2010
+
+executable claws-bench
+  build-depends:       base >=4.7 && <4.8,
+                       criterion,
+                       vector,
+                       claws
+  main-is:             Main.hs
+  hs-source-dirs:      bench
+  default-language:    Haskell2010
+
 

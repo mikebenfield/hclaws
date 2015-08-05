@@ -12,6 +12,7 @@ import Data.Maybe (fromJust)
 
 import qualified Data.Matrix as M
 
+import Math.Fan
 import Math.LinearAlgebra
 import Math.ConservationLaws
 
@@ -40,16 +41,16 @@ system =
 
 solution1 :: WaveFan
 solution1 =
-    WaveFan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 0
+    Fan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 0
 
 -- this is not an entropy solution
 solution2 :: WaveFan
 solution2 =
-    WaveFan [(0, SWave Shock {speed = 0.5, sFamily = 1})] 1
+    Fan [(0, SWave Shock {speed = 0.5, sFamily = 1})] 1
 
 solution3 :: WaveFan
 solution3 =
-    WaveFan [(0, wave)] 1
+    Fan [(0, wave)] 1
   where
     wave =
         RWave Rarefaction
@@ -68,5 +69,5 @@ solutions = [solution1, solution2, solution3, solution4, solution5]
 
 nonsolution :: WaveFan
 nonsolution =
-    WaveFan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 2
+    Fan [(1, SWave Shock {speed = 0.5, sFamily = 1})] 2
 

@@ -9,6 +9,7 @@ module Math.ConservationLaws.Examples.ShallowWater (
 
 import Data.Matrix ((!), fromLists)
 
+import Math.Fan
 import Math.LinearAlgebra
 import Math.ConservationLaws
 
@@ -80,15 +81,15 @@ solveRiemann' :: Mat -> Mat -> WaveFan
 solveRiemann' uL uR
   | hL <= 0 || hR <= 0 || r2 uR >= r1 uL = -- region V or out of domain
     error "ShallowWater solveRiemann: out of domain"
-  | uL == uR = WaveFan [] uL
+  | uL == uR = Fan [] uL
   | r1 uR == r1 uL && hR < hL = -- along R1
-    WaveFan [(uL, rarefactionWave field1 1 uL uR)] uR
+    Fan [(uL, rarefactionWave field1 1 uL uR)] uR
   | r2 uR == r2 uL && hR > hL = -- along R2
-    WaveFan [(uL, rarefactionWave field2 2 uL uR)] uR
+    Fan [(uL, rarefactionWave field2 2 uL uR)] uR
   | s1 uR == s1 uL && hR > hL = -- along S1
-    WaveFan [(uL, shockWave field1 1 uL uR)] uR
+    Fan [(uL, shockWave field1 1 uL uR)] uR
   | s2 uR == s2 uL && hR < hL = -- along S2
-    WaveFan [(uL, shockWave field2 2 uL uR)] uR
+    Fan [(uL, shockWave field2 2 uL uR)] uR
   | r2 uR < r2 uL && s1 uR > s1 uL = -- region I, S1.R2
     let hM = newtonN (f hR hL vR vL) (f' hR hL) ((hL+hR)/2) 50
         qM = hM * (vL - (1 / sqrt 2) * (hM-hL) * c hM hL)
@@ -125,7 +126,7 @@ solveRiemann' uL uR
             -> (CharField -> Int -> Mat -> Mat -> Wave)
             -> WaveFan
     waveFan uM waveA waveB =
-        WaveFan [(uL, waveA field1 1 uL uM), (uM, waveB field2 2 uM uR)] uR
+        Fan [(uL, waveA field1 1 uL uM), (uM, waveB field2 2 uM uR)] uR
     hL = h uL
     qL = q uL
     hR = h uR
@@ -164,7 +165,7 @@ system =
 
 solution1 :: WaveFan
 solution1 =
-    WaveFan [(pt1, SWave Shock {speed = speed', sFamily = 1})] pt2
+    Fan [(pt1, SWave Shock {speed = speed', sFamily = 1})] pt2
   where
     pt1 = col [1,1]
     pt2 = shock1 pt1 (-1)

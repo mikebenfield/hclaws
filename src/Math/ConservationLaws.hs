@@ -20,6 +20,7 @@ import qualified Data.Vector as V
 import qualified Data.Matrix as M
 
 import Math.LinearAlgebra
+import Math.Fan
 import qualified Math.Curves as C
 import qualified Math.Integration as I
 
@@ -95,10 +96,11 @@ shockWave :: CharField -> Int -> Mat -> Mat -> Wave
 shockWave field familyI uL uR =
     SWave Shock {speed = shockSpeed field uL uR, sFamily = familyI}
 
-data WaveFan = WaveFan (V.Vector (Mat, Wave)) Mat
+type WaveFan = Fan Mat Wave
 
+-- can't use findOuterAt, because we don't need just the value
 atSpeed :: WaveFan -> Double -> Mat
-atSpeed (WaveFan v last) speed =
+atSpeed (Fan v last) speed =
     case V.find (\(_, wave) -> speed <= fastestSpeed wave) v of
         Nothing -> last
         Just (_, RWave Rarefaction{..})
@@ -127,7 +129,7 @@ integrateFanOnCurve c s wf =
 
 strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
 strengthsToFan uL fields strengths =
-    WaveFan (V.generate (V.length shifted) unshift) (fst $ V.last shifted)
+    Fan (V.generate (V.length shifted) unshift) (fst $ V.last shifted)
   where
     shifted = V.unfoldr strengthsToFan_ (uL, fields, strengths, [1..])
     unshift 0 = (uL, snd $ V.unsafeIndex shifted 0)
