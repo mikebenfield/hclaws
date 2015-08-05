@@ -1,6 +1,4 @@
 
-{-# LANGUAGE RecordWildCards #-}
-
 module Math.ConservationLaws (
     CharField(..), System(..), Wave(..), WaveFan(..),
     Rarefaction(..), Shock(..),

@@ -1,6 +1,4 @@
 
-{-# LANGUAGE OverloadedLists #-}
-
 module Math.ConservationLaws.Examples.ShallowWater (
     system,
     solution1,

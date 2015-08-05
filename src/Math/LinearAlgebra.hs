@@ -1,6 +1,4 @@
 
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-
 module Math.LinearAlgebra (
     row, col, getRows, getCols,
     toList,

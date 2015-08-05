@@ -1,6 +1,4 @@
 
-{-# LANGUAGE OverloadedLists #-}
-
 module Math.ConservationLaws.Examples.Burgers (
     system,
     solution1, solution2, solution3, solution4, solution5,

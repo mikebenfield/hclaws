@@ -1,6 +1,4 @@
 
-{-# LANGUAGE BangPatterns #-}
-
 module Math.Fan (
     Fan(..),
     indexI,
@@ -71,7 +69,7 @@ findOuterAtBinary :: (inner -> Ordering) -> Fan outer inner -> outer
 findOuterAtBinary compare (Fan vec last) =
     loop 0 (V.length vec)
   where
-    loop !lower !upper
+    loop lower upper
       | lower >= upper =
           if lower >= V.length vec
              then last
