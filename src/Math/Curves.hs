@@ -60,4 +60,3 @@ glueCurves curves t
     t' = t * fromIntegral len
     flr = floor t'
     t'' = t' - (fromIntegral flr) :: Double
-

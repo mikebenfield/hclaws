@@ -6,8 +6,6 @@ module Math.ConservationLaws.Examples.Burgers (
     nonsolution,
 ) where
 
-import Data.Maybe (fromJust)
-
 import qualified Data.Matrix as M
 
 import Math.Fan
@@ -31,7 +29,7 @@ system :: System
 system =
     System
         { n = 1
-        , flux = \u -> (1/2) *. u^2
+        , flux = \u -> (1/2) *. u^(2::Int)
         , dFlux = id
         , fields = [field]
         , solveRiemann = \ul ur -> strengthsToFan ul [field] [u $ ur - ul]
@@ -68,4 +66,3 @@ solutions = [solution1, solution2, solution3, solution4, solution5]
 nonsolution :: WaveFan
 nonsolution =
     Fan [(1, SWave Shock {speed = 0.5, sFamily = 0})] 2
-

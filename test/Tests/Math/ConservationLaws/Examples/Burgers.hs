@@ -52,4 +52,3 @@ unitTests = testGroup "Unit Tests" $
     , testWaveFan (CL.solveRiemann B.system (col [13]) (col [0])) "Example 2"
     , testWaveFan B.solution5 "computed solution 4"
     ]
-

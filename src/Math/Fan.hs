@@ -10,6 +10,8 @@ module Math.Fan (
     unsafeIndexO,
     lastO,
     firstO,
+    cons,
+    snoc,
     findOuterAt,
     findOuterAtLinear,
     findOuterAtBinary,
@@ -20,7 +22,7 @@ module Math.Fan (
 
 import Data.Bits (shiftR)
 
-import Data.Vector as V
+import qualified Data.Vector as V
 
 data Fan outer inner = Fan (V.Vector (outer, inner)) outer
     deriving (Eq)
@@ -50,7 +52,7 @@ safeIndexO (Fan vec last) i
 unsafeIndexO :: Fan outer inner -> Int -> outer
 unsafeIndexO (Fan vec last) i
     | i == V.length vec = last
-    | otherwise = fst $ vec `unsafeIndex` i
+    | otherwise = fst $ vec `V.unsafeIndex` i
 
 lastO :: Fan outer inner -> outer
 lastO (Fan _ last) = last
@@ -81,18 +83,18 @@ findOuterAtBinary compare fan = indexO fan $ findIndexAtBinary compare fan
 findIndexAt :: (inner -> Ordering) -> Fan outer inner -> Int
 findIndexAt = findIndexAtBinary
 
--- performance note: I experimented with first checking if 
+-- performance note: I experimented with first checking if
 -- compare (V.last vec) == GT
 -- That way we would not have to check bounds while iterating through vec.
 -- But that is somehow *slower*.
 findIndexAtLinear :: (inner -> Ordering) -> Fan outer inner -> Int
-findIndexAtLinear compare (Fan vec last) =
+findIndexAtLinear compare (Fan vec _) =
     case V.findIndex (\(_, i) -> not $ compare i == GT) vec of
         Just j -> j
         Nothing -> V.length vec
 
 findIndexAtBinary :: (inner -> Ordering) -> Fan outer inner -> Int
-findIndexAtBinary compare (Fan vec last) =
+findIndexAtBinary compare (Fan vec _) =
     loop 0 (V.length vec)
   where
     loop lower upper
@@ -105,4 +107,3 @@ findIndexAtBinary compare (Fan vec last) =
             GT -> loop (k+1) upper
             EQ -> k
       where k = shiftR (upper + lower) 1
-

@@ -1,7 +1,11 @@
 
 module Math.ConservationLaws (
-    CharField(..), System(..), Wave(..), WaveFan(..),
-    Rarefaction(..), Shock(..),
+    CharField(..),
+    System(..),
+    Wave(..),
+    WaveFan,
+    Rarefaction(..),
+    Shock(..),
     Linearity(..),
     rarefactionWave,
     shockWave,
@@ -77,10 +81,6 @@ fastestSpeed :: Wave -> Double
 fastestSpeed (RWave Rarefaction{..}) = speedR
 fastestSpeed (SWave Shock{..}) = speed
 
-slowestSpeed :: Wave -> Double
-slowestSpeed (RWave Rarefaction{..}) = speedL
-slowestSpeed (SWave Shock{..}) = speed
-
 rarefactionWave :: CharField -> Int -> Mat -> Mat -> Wave
 rarefactionWave field familyI uL uR =
     RWave Rarefaction
@@ -151,4 +151,3 @@ strengthsToFan_ (uL, f:fs, s:ss, i:is) =
     u2Rare = rarefactionCurve f uL s
     u2Shock = shockCurve f uL s
 strengthsToFan_ _ = error "strengthsToFan"
-

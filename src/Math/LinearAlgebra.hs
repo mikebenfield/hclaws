@@ -36,4 +36,3 @@ normP p m
   | p < 1 = error "normP called with p<1"
   | p == (1/0) = maximum $ map abs $ toList m
   | otherwise = (sum $ map (\x -> (abs x)**p) $ toList m)**(1/p)
-

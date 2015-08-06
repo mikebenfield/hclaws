@@ -72,7 +72,8 @@ field2 =
 newton1 f f' x0 =
     x0 - (f x0) / (f' x0)
 
-newtonN f f' x0 0 = x0
+newtonN :: (Double -> Double) -> (Double -> Double) -> Double -> Int -> Double
+newtonN _ _ x0 0 = x0
 newtonN f f' x0 n = newtonN f f' (newton1 f f' x0) (n-1)
 
 solveRiemann' :: Mat -> Mat -> WaveFan
@@ -96,7 +97,7 @@ solveRiemann' uL uR
     waveFan uM shockWave rarefactionWave
   | r1 uR > r1 uL && r2 uR > r2 uL = -- region II, R1.R2
     let
-        hM = ((2 * (sqrt hR + sqrt hL) - vR + vL) / 4)^2
+        hM = ((2 * (sqrt hR + sqrt hL) - vR + vL) / 4)^(2::Int)
         qM = (r1 uL) * hM - 2 * hM**1.5
         uM = col [hM, qM]
     in
@@ -128,7 +129,6 @@ solveRiemann' uL uR
     hL = h uL
     qL = q uL
     hR = h uR
-    qR = q uR
     vR = v uR
     vL = v uL
     c hr hm = sqrt (1/hr + 1/hm)
@@ -137,11 +137,11 @@ solveRiemann' uL uR
         2 * sqrt 2 * (sqrt hr - sqrt hm) - (hm-hl)*sqrt(1/hm+1/hl) -
           sqrt 2 * (vr - vl)
     f' hr hl hm =
-        negate (c hr hm) + (hm - hl) / (2*hm^2*c hr hm) - sqrt (2 / hm)
+        negate (c hr hm) + (hm - hl) / (2*hm^(2::Int)*c hr hm) - sqrt (2 / hm)
     g hm = d hR hm + d hL hm - sqrt 2 * (vR - vL)
     g' hm =
-        (hm-hL) / (2 * hm^2 * c hL hm) - c hL hm +
-        (hm-hR) / (2 * hm^2 * c hR hm) - c hR hm
+        (hm-hL) / (2 * hm^(2::Int) * c hL hm) - c hL hm +
+        (hm-hR) / (2 * hm^(2::Int) * c hR hm) - c hR hm
     r1 pt = (v pt) + 2 * sqrt (h pt)
     r2 pt = (v pt) - 2 * sqrt (h pt)
     s1 pt =
@@ -155,8 +155,8 @@ system :: System
 system =
     System
         { n = 2
-        , flux = \m -> col [q m, (q m)**2 / (h m) + (h m)^2/2]
-        , dFlux = \m -> fromLists [[0, 1], [(h m) - (v m)^2, 2 * (v m)]]
+        , flux = \m -> col [q m, (q m)**2 / (h m) + (h m)^(2::Int)/2]
+        , dFlux = \m -> fromLists [[0, 1], [(h m) - (v m)^(2::Int), 2 * (v m)]]
         , fields = [field1, field2]
         , solveRiemann = solveRiemann'
         }
@@ -173,4 +173,3 @@ solution2 = solveRiemann system (col [1,1]) (col [2,2])
 solution3 = solveRiemann system (col [1,1]) (col [1,2])
 solution4 = solveRiemann system (col [1,1]) (col [0.5,0.5])
 solution5 = solveRiemann system (col [1,1]) (col [1,0])
-

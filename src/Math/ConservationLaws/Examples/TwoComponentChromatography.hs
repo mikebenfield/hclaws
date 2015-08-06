@@ -46,7 +46,7 @@ rarefaction2 _ m b = col [u m - b, v m + b]
 
 shock2 = rarefaction2
 
-speed2 k ul ur = lambda2 k ul
+speed2 k ul _ = lambda2 k ul
 
 field2 :: Double -> CharField
 field2 k =
@@ -65,7 +65,7 @@ system k =
         { n = 2
         , flux = \m -> col [k*(u m)/(1 + u m + v m), k*(v m)/(1 + u m + v m)]
         , dFlux = \m ->
-            k / (1 + u m + v m)^2 *. 
+            k / (1 + u m + v m)^(2::Int) *.
                 fromLists [[1 + v m, - u m], [-v m, 1 + u m]]
         , fields = fs
         , solveRiemann = \mL mR ->
@@ -83,4 +83,3 @@ solution2 = solveRiemann (system 1) (col [3,4]) (col [8,1])
 solution3 = solveRiemann (system 1) (col [1,1]) (col [1,2])
 solution4 = solveRiemann (system 1) (col [1,1]) (col [0.5,0.5])
 solution5 = solveRiemann (system 1) (col [1,1]) (col [2,0.5])
-

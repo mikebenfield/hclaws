@@ -66,4 +66,3 @@ unitTests = testGroup "Unit Tests"
           I.adaptiveSimpsonLineIntegral
               acc box1 form3 0 1 @?~ col [0, 0]
     ]
-

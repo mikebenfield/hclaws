@@ -28,7 +28,7 @@ field1 lambda =
 
 -- XXX
 -- This system is wrong because this field does not have the constant
--- eigenvector [0,1,0]. This needs to be fixed. 
+-- eigenvector [0,1,0]. This needs to be fixed.
 rarefaction2 m a = col [(u m), (v m) + a, (w m)]
 field2 =
     CharField
@@ -53,7 +53,7 @@ field3 lambda =
 
 flux' lambda m =
     col [-lambda * c2v * (u m) + lambda * s2v * (w m),
-         (v m)^2/2,
+         (v m)^(2::Int)/2,
          lambda * s2v * (u m) + lambda * c2v * (w m)]
   where
     c2v = cos (2 * (v m))
@@ -98,4 +98,3 @@ system lambda =
 solution1 lambda = solveRiemann' lambda (col [0,0,0]) (col [1,pi/4,1])
 solution2 lambda = solveRiemann' lambda (col [0,0,0]) (col [1,pi/3,1])
 solution3 lambda = solveRiemann' lambda (col [0,0,0]) (col [0,pi/4,1])
-

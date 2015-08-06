@@ -49,4 +49,3 @@ unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
     [
     ]
-

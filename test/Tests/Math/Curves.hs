@@ -71,4 +71,3 @@ unitTests = testGroup "Unit Tests" $
   , HU.testCase "box1' 0.76" $
     C.d box1 0.75 @?~ col [0,-4]
   ]
-

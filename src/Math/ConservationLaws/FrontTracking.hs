@@ -1,8 +1,8 @@
 
 module Math.ConservationLaws.FrontTracking (
-    Piecewise(..),
+    Piecewise,
     evalPiecewise,
-    PiecewiseXt(..),
+    PiecewiseXt,
     evalPiecewiseXt,
     Front(..),
     FrontType(..),
@@ -108,19 +108,13 @@ data Configuration =
         , initial :: Piecewise
         }
 
-emptyPiecewise :: Piecewise
-emptyPiecewise = Fan [] 0
-
-emptyPiecewiseXt :: PiecewiseXt
-emptyPiecewiseXt = Fan [] 0
-
 trackFronts :: Configuration -> System -> Output
 trackFronts config@Configuration{..} system =
     loop config system 0 $ fromMaybe newOutput previousOutput
   where
     newOutput = Output
         { fronts = Set.empty
-        , solution = Fan [] emptyPiecewiseXt
+        , solution = Fan [] (Fan [] 0)
         , stage = piecewiseToStage 0 (n system) initial
         }
 
@@ -134,7 +128,7 @@ loop config@Configuration{..} system m output@Output{..} =
             , fronts = withEndedFronts
             , solution =
                 case solution of
-                    Fan solns last -> Fan solns piecewiseXt
+                    Fan solns _ -> Fan solns piecewiseXt
             }
         _ -> loop config system (m+1) $ Output
             { stage = nextStage
@@ -290,7 +284,7 @@ loop config@Configuration{..} system m output@Output{..} =
         Fan solnVec _ = solveRiemann system uL uR
 
         approximateWave :: (Mat, Wave) -> V.Vector (Mat, Front)
-        approximateWave (val, RWave r) = approximateRarefaction origin' gi r
+        approximateWave (_, RWave r) = approximateRarefaction origin' gi r
         approximateWave (val, SWave s) =
             [(val, Front
                 { origin = origin'

@@ -3,10 +3,6 @@ module Math.Integration (
     simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral
 ) where
 
-import Control.Exception.Base (assert)
-
-import Data.Matrix as M
-
 import qualified Math.Curves as C
 import Math.LinearAlgebra
 
@@ -56,4 +52,3 @@ adaptiveSimpsonLineIntegral ε γ ω a b =
     adaptiveSimpson ε f a b
   where
     f t = (ω $ C.at γ t) * C.d γ t
-

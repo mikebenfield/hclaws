@@ -51,4 +51,3 @@ unitTests = testGroup "Unit Tests" $
     , testWaveFan TCC.solution4 "computed solution 4"
     , testWaveFan TCC.solution5 "computed solution 5"
     ]
-

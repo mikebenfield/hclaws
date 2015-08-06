@@ -24,4 +24,3 @@ l @?~ r
 infix 1 @~?
 (@~?) :: Mat -> Mat -> HU.Assertion
 (@~?) = flip (@?~)
-

@@ -51,4 +51,3 @@ fan2 = F.Fan [('a', 0), ('b', 2)] 'c'
 
 case_findOuterAt_4 = do
     F.findOuterAt (compare 1) fan1 @?= 'b'
-

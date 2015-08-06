@@ -25,4 +25,3 @@ tests = testGroup "Tests"
   , Tests.Math.Fan.tests
   , Tests.Math.Integration.tests
   ]
-

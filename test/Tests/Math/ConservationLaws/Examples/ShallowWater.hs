@@ -52,4 +52,3 @@ unitTests = testGroup "Unit Tests" $
     , testWaveFan SW.solution4 "computed solution 4"
     , testWaveFan SW.solution5 "computed solution 5"
     ]
-
