@@ -10,12 +10,14 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Math.ConservationLaws, Math.Integration,
-                       Math.Curves,
+  exposed-modules:     Math.ConservationLaws
+                       Math.Integration
+                       Math.Curves
                        Math.Fan
-                       Math.LinearAlgebra,
-                       Math.ConservationLaws.FrontTracking,
+                       Math.LinearAlgebra
+                       Math.ConservationLaws.FrontTracking
                        Math.ConservationLaws.Examples.Burgers
+                       Math.ConservationLaws.Examples.Linear
                        Math.ConservationLaws.Examples.ShallowWater
                        Math.ConservationLaws.Examples.TwoComponentChromatography
                        Math.ConservationLaws.Examples.JenssenYoung2004_31

@@ -5,6 +5,7 @@ import qualified Tests.Math.ConservationLaws
 import qualified Tests.Math.ConservationLaws.FrontTracking
 import qualified Tests.Math.ConservationLaws.Examples.Burgers
 import qualified Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31
+import qualified Tests.Math.ConservationLaws.Examples.Linear
 import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
 import qualified Tests.Math.ConservationLaws.Examples.TwoComponentChromatography
 import qualified Tests.Math.Curves
@@ -17,6 +18,7 @@ tests :: TestTree
 tests = testGroup "Tests"
   [ Tests.Math.ConservationLaws.Examples.Burgers.tests
   , Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31.tests
+  , Tests.Math.ConservationLaws.Examples.Linear.tests
   , Tests.Math.ConservationLaws.Examples.ShallowWater.tests
   , Tests.Math.ConservationLaws.Examples.TwoComponentChromatography.tests
   , Tests.Math.ConservationLaws.FrontTracking.tests

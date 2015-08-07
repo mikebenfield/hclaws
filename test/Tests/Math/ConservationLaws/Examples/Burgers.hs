@@ -25,7 +25,6 @@ properties = testGroup "Properties"
     [
     ]
 
-b1 = box (point (0) 1) 20 20
 testCurves =
     [ box (point (-5) 1) 20 20
     , box (point (-10) 2) 50 3
