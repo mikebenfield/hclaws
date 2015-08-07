@@ -155,7 +155,7 @@ loop config@Configuration{..} system m output@Output{..} =
             withNewFronts
             intersected
       where
-        endThem i = V.map (\f -> f {end = Just (nextXs V.! i, thisTime)})
+        endThem i = V.map (\f -> f {end = Just (nextXs V.! i, nextTime)})
 
     withNewFronts :: Set.Set Front
     withNewFronts =
@@ -226,7 +226,7 @@ loop config@Configuration{..} system m output@Output{..} =
         let nowX = x + s * (thisTime - t)
             nowX' = x' + s' * (thisTime - t')
         in
-        if s <= s' then 1/0 else (nowX' - nowX) / (s - s')
+        if s <= s' then 1/0 else thisTime + (nowX' - nowX) / (s - s')
 
     piecewiseXt :: PiecewiseXt
     piecewiseXt = Fan

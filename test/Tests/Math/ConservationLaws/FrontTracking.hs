@@ -6,6 +6,8 @@ module Tests.Math.ConservationLaws.FrontTracking (
     tests
 ) where
 
+import Debug.Trace -- XXX
+
 import Test.Tasty (TestTree, testGroup)
 import qualified Test.Tasty.QuickCheck as QC
 import qualified Test.Tasty.SmallCheck as SC
@@ -18,6 +20,7 @@ import qualified Data.Vector as V
 import Math.Fan
 import Math.LinearAlgebra
 import qualified Math.ConservationLaws.Examples.Burgers as B
+import qualified Math.ConservationLaws.Examples.Linear as L
 import qualified Math.ConservationLaws.Examples.ShallowWater as SW
 
 import qualified Math.ConservationLaws.FrontTracking as FT
@@ -128,3 +131,10 @@ case_trackFronts_4_1 = do
 
 case_trackFronts_4_2 = do
     FT.validUntil output4 @?= 1/0
+
+piecewise5 = Fan [(col [0, 0, 0], 0), (col [2, 3, 4], 1)] (col [1, 7, 1])
+output5 = FT.trackFronts
+    simpleConfig {FT.initial = piecewise5, FT.stopAfterSteps = Just 2} L.system
+
+case_trackFronts_5_1 =
+    Set.size (FT.fronts output5) @?= 8
