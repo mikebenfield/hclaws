@@ -3,7 +3,7 @@ module Math.Integration (
     simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral
 ) where
 
-import qualified Math.Curves as C
+import Math.Curves
 import Math.LinearAlgebra
 
 simpson' :: Mat -> Mat -> Mat -> Double -> Double -> Mat
@@ -43,12 +43,13 @@ adaptiveSimpson ε f a b =
 
 adaptiveSimpsonLineIntegral
     :: Double
-    -> C.Curve
-    -> (Mat -> Mat)
+    -> Curve
+    -> (Point -> Mat)
     -> Double
     -> Double
     -> Mat
 adaptiveSimpsonLineIntegral ε γ ω a b =
     adaptiveSimpson ε f a b
   where
-    f t = (ω $ C.at γ t) * C.d γ t
+    f s = (ω $ curve γ s) * tan s
+    tan s = col [x $ tangent γ s, t $ tangent γ s]

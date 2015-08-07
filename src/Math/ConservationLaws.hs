@@ -30,7 +30,7 @@ type MatField = Mat -> Mat
 type ScalarField = Mat -> Double
 type Curve = Double -> Mat
 type BasePointCurve = Mat -> Curve
-type PotentialSolution = Double -> Double -> Mat
+type PotentialSolution = Point -> Mat
 
 data Linearity = GNL | LDG | Neither
     deriving (Eq, Show)
@@ -105,16 +105,14 @@ atSpeed (Fan v last) speed =
             | speed > speedL -> function speed
         Just (value, _) -> value
 
-atPoint :: WaveFan -> Double -> Double -> Mat
-atPoint wf x t = atSpeed wf (x/t)
+atPoint :: WaveFan -> Point -> Mat
+atPoint wf Point{..} = atSpeed wf (x/t)
 
-solutionForm :: System -> PotentialSolution -> Mat -> Mat
-solutionForm s u xt =
-    uxt M.<|> negate (flux s uxt)
+solutionForm :: System -> PotentialSolution -> Point -> Mat
+solutionForm s u pt =
+    upt M.<|> negate (flux s upt)
   where
-    x = xt M.! (1, 1)
-    t = xt M.! (2, 1)
-    uxt = u x t
+    upt = u pt
 
 accuracy = 0.000001
 
@@ -122,8 +120,7 @@ integrateFanOnCurve :: C.Curve -> System -> WaveFan -> Mat
 integrateFanOnCurve c s wf =
     I.adaptiveSimpsonLineIntegral accuracy c solutionForm' 0 1
   where
-    solutionForm' =
-        solutionForm s $ atPoint wf
+    solutionForm' = solutionForm s $ atPoint wf
 
 strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
 strengthsToFan uL fields strengths =

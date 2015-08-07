@@ -31,6 +31,7 @@ library
                        FlexibleInstances
   ghc-options:         -O2 -Wall -fno-warn-name-shadowing
                        -fno-warn-missing-signatures
+                       -funbox-strict-fields
 
 executable claws-test
   build-depends:       base >=4.7 && <4.8,

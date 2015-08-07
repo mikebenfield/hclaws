@@ -1,62 +1,50 @@
 
 module Math.Curves (
     Curve(..),
-    at, d
+    box,
+    circle
 ) where
 
 import Math.LinearAlgebra
 
-data Curve
-  = Box Mat Double Double
-  | Circle Mat Double
-  | Segment Mat Mat
-  | Constant Mat
-  | General (Double -> Mat) (Double -> Mat)
+data Curve = Curve
+    { curve :: Double -> Point
+    , tangent :: Double -> Point
+    }
 
-at :: Curve -> Double -> Mat
-at (Box lowerLeft width height) =
-    glueCurves
-        [ lineSegment c1 c2
-        , lineSegment c2 c3
-        , lineSegment c3 c4
-        , lineSegment c4 c1
-        ]
+box :: Point -> Double -> Double -> Curve
+box Point{..} width height = Curve
+    { curve = \s ->
+        select
+            (point (x + scale s * width) t)
+            (point (x + width) (t + scale s * height))
+            (point (x + (1 - scale s) * width) (t + height))
+            (point x (t + (1 - scale s) * height))
+            s
+    , tangent = \s ->
+        select
+            (point (4 * width) 0)
+            (point 0 (4 * height))
+            (point (-4 * width) 0)
+            (point 0 (-4 * height))
+            s
+    }
   where
-    e1 = col [width, 0]
-    e2 = col [0, height]
-    c1 = lowerLeft
-    c2 = lowerLeft + e1
-    c3 = c2 + e2
-    c4 = lowerLeft + e2
-at (Circle center radius) = \t ->
-    col [radius*cos (2*pi*t), radius*sin (2*pi*t)] + center
-at (Segment p q) = \t -> (1-t) *. p + t *. q
-at (Constant c) = \_ -> c
-at (General f _) = f
+    fracPart s = s - (fromIntegral (floor s :: Int))
+    -- The next line actually matters. Having a jump discontinuity on the last
+    -- point will screw with the adapted simpson's rule.
+    scale 1 = 1
+    scale s = fracPart (4 * fracPart s)
+    select pt1 pt2 pt3 pt4 s
+      | s < 0.25 = pt1
+      | s < 0.5 = pt2
+      | s < 0.75 = pt3
+      | otherwise = pt4
 
-d :: Curve -> Double -> Mat
-d (Box _ width height) =
-    glueCurves [\_ -> e1, \_ -> e2, \_ -> negate e1, \_ -> negate e2]
-  where
-    e1 = col [4*width, 0] :: Mat
-    e2 = col [0, 4*height]
-d (Circle _ radius) = \t ->
-    col [-factor*sin (2*pi*t), factor*cos (2*pi*t)]
-  where
-    factor = 2*pi*radius
-d (Segment p q) = \_ -> q - p
-d (Constant _) = \_ -> col [0, 0]
-d (General _ f') = f'
-
-lineSegment :: Mat -> Mat -> Double -> Mat
-lineSegment p q t = (1-t) *. p + t *. q
-
-glueCurves :: [Double -> a] -> Double -> a
-glueCurves curves t
-  | flr >= fromIntegral len = last curves 1
-  | otherwise = (curves !! flr) t''
-  where
-    len = length curves
-    t' = t * fromIntegral len
-    flr = floor t'
-    t'' = t' - (fromIntegral flr) :: Double
+circle :: Point -> Double -> Curve
+circle Point{..} radius = Curve
+    { curve = \s ->
+        point (x + radius * cos (2*pi*s)) (t + radius * sin (2*pi*s))
+    , tangent = \s ->
+        point (-2*pi*radius * sin (2*pi*s)) (2*pi*radius * cos (2*pi*s))
+    }

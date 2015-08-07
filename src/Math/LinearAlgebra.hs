@@ -1,6 +1,11 @@
 
 module Math.LinearAlgebra (
-    row, col, getRows, getCols,
+    Point(..),
+    point,
+    row,
+    col,
+    getRows,
+    getCols,
     toList,
     (*.),
     Mat,
@@ -9,6 +14,15 @@ module Math.LinearAlgebra (
 
 import qualified Data.Matrix as M
 import qualified Data.Vector as V
+
+data Point = Point
+    { x :: !Double
+    , t :: !Double
+    }
+    deriving (Show, Eq)
+
+point :: Double -> Double -> Point
+point x' t' = Point {x=x', t=t'}
 
 row :: [a] -> M.Matrix a
 row list = M.fromList 1 (length list) list
