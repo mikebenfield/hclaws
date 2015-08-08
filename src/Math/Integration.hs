@@ -1,6 +1,10 @@
 
 module Math.Integration (
-    simpson, adaptiveSimpson, adaptiveSimpsonLineIntegral
+    simpson,
+    adaptiveSimpson,
+    adaptiveSimpsonLineIntegral,
+    euler,
+    rungeKutta
 ) where
 
 import Math.Curves
@@ -53,3 +57,36 @@ adaptiveSimpsonLineIntegral ε γ ω a b =
   where
     f s = (ω $ curve γ s) * tan s
     tan s = col [x $ tangent γ s, t $ tangent γ s]
+
+euler :: Int -> (Mat -> Double -> Mat) -> Mat -> Double -> Mat
+euler steps eqn x0 t
+  | steps <= 0 = x0
+  | otherwise = loop steps x0 0
+  where
+    stepSize = t / fromIntegral steps
+    loop :: Int -> Mat -> Double -> Mat
+    loop stepsRemaining xC tC
+      | stepsRemaining == 0 = xC
+      | otherwise =
+        loop (stepsRemaining - 1) (xC + stepSize *. eqn xC tC) (tC + stepSize)
+
+rungeKutta :: Int -> (Mat -> Double -> Mat) -> Mat -> Double -> Mat
+rungeKutta steps eqn x0 t
+  | steps <= 0 = x0
+  | otherwise = loop steps x0 0
+  where
+    stepSize = t / fromIntegral steps
+    stepSizeHalf = 0.5 * stepSize
+    stepSizeSixth = (1/6) * stepSize
+    loop :: Int -> Mat -> Double -> Mat
+    loop stepsRemaining xC tC
+      | stepsRemaining == 0 = xC
+      | otherwise =
+        loop (stepsRemaining - 1) (xC + stepSizeSixth*.(k1 + 2*(k2+k3) + k4))
+            (tC + stepSize)
+      where
+        middleT = t + stepSizeHalf
+        k1 = eqn xC t
+        k2 = eqn (xC + stepSizeHalf*.k1) middleT
+        k3 = eqn (xC + stepSizeHalf*.k2) middleT
+        k4 = eqn (xC + stepSize*.k3) (t + stepSize)

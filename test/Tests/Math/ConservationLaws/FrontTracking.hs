@@ -6,8 +6,6 @@ module Tests.Math.ConservationLaws.FrontTracking (
     tests
 ) where
 
-import Debug.Trace -- XXX
-
 import Test.Tasty (TestTree, testGroup)
 import qualified Test.Tasty.QuickCheck as QC
 import qualified Test.Tasty.SmallCheck as SC
