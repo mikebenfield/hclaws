@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Tests.Math.ConservationLaws.Examples.Burgers (
     tests
@@ -25,6 +27,7 @@ properties = testGroup "Properties"
     [
     ]
 
+testCurves :: [Curve]
 testCurves =
     [ box (point (-5) 1) 20 20
     , box (point (-10) 2) 50 3
@@ -34,12 +37,12 @@ testCurves =
     , circle (point 1 2) 1
     ]
 
-testWaveFan :: CL.WaveFan -> String -> TestTree
+testWaveFan :: CL.WaveFan 1 -> String -> TestTree
 testWaveFan wf name = do
     HU.testCase name $ mapM_ intOnCurve testCurves
   where
     intOnCurve cc =
-        CL.integrateFanOnCurve cc B.system wf @?~ col [0]
+        CL.integrateFanOnCurve cc B.system wf @?~ [0]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
@@ -48,7 +51,7 @@ unitTests = testGroup "Unit Tests" $
     , testWaveFan B.solution3 "manual solution 3"
     , testWaveFan B.solution4 "computed solution 3"
 
-    , testWaveFan (CL.solveRiemann B.system (col [-1]) (col [1])) "Example 1"
-    , testWaveFan (CL.solveRiemann B.system (col [13]) (col [0])) "Example 2"
+    , testWaveFan (CL.solveRiemann B.system [-1] [1]) "Example 1"
+    , testWaveFan (CL.solveRiemann B.system [13] [0]) "Example 2"
     , testWaveFan B.solution5 "computed solution 4"
     ]

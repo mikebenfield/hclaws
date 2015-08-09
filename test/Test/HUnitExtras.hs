@@ -1,12 +1,11 @@
-
 module Test.HUnitExtras (
     (@?~),
     (@~?),
-    (@?~~),
-    (@~~?)
 ) where
 
 import qualified Test.Tasty.HUnit as HU
+
+import Math.FTensor.Algebra
 
 import Math.LinearAlgebra
 
@@ -15,28 +14,15 @@ import Math.LinearAlgebra
 epsilon :: Double
 epsilon = 0.01
 
-infix 1 @?~~
-(@?~~) :: Point -> Point -> HU.Assertion
-l@Point {x = x', t = t'} @?~~ r@Point {x = x'', t = t''}
-  | abs (x' - x'') < epsilon && abs (t' - t'') < epsilon = HU.assertString ""
-  | otherwise =
-        HU.assertString $
-            "expected (approximately):\n" ++ (show r) ++ "\n"
-         ++ " but got:\n" ++ (show l)
-
-infix 1 @~~?
-(@~~?) :: Point -> Point -> HU.Assertion
-(@~~?) = flip (@?~~)
-
 infix 1 @?~
-(@?~) :: Mat -> Mat -> HU.Assertion
+(@?~) :: (Show a, Normable a, WithNegatives a) => a -> a -> HU.Assertion
 l @?~ r
-  | normP (1/0) (l-r) < epsilon = HU.assertString ""
+  | normP (1/0) (l-.r) < epsilon = HU.assertString ""
   | otherwise =
         HU.assertString $
             "expected (approximately):\n" ++ (show r) ++ "\n"
          ++ " but got:\n" ++ (show l)
 
 infix 1 @~?
-(@~?) :: Mat -> Mat -> HU.Assertion
+(@~?) :: (Show a, Normable a, WithNegatives a) => a -> a -> HU.Assertion
 (@~?) = flip (@?~)

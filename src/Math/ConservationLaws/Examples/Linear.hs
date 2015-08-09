@@ -1,61 +1,66 @@
+{-# LANGUAGE DataKinds #-}
 
 module Math.ConservationLaws.Examples.Linear (
     system,
 ) where
 
-import qualified Data.Matrix as M
+import Data.Proxy
 
-import Math.LinearAlgebra
+import Math.FTensor.Algebra
+import qualified Math.FTensor.General as F
+
 import Math.ConservationLaws
 
-field1 :: CharField
+field1 :: CharField 3
 field1 =
     CharField
         { λ = \_ -> -1
-        , r = \_ -> col [1, 0, 0]
-        , rarefactionCurve = \pt a -> pt + col [a, 0, 0]
-        , shockCurve = \pt a -> pt + col [a, 0, 0]
+        , r = \_ -> [1, 0, 0]
+        , rarefactionCurve = \pt a -> pt +. [a, 0, 0]
+        , shockCurve = \pt a -> pt +. [a, 0, 0]
         , shockSpeed = \_ _ -> -1
         , linearity = LDG
         }
 
-field2 :: CharField
+field2 :: CharField 3
 field2 =
     CharField
         { λ = \_ -> 0
-        , r = \_ -> col [0, 1, 0]
-        , rarefactionCurve = \pt a -> pt + col [0, a, 0]
-        , shockCurve = \pt a -> pt + col [0, a, 0]
+        , r = \_ -> [0, 1, 0]
+        , rarefactionCurve = \pt a -> pt +. [0, a, 0]
+        , shockCurve = \pt a -> pt +. [0, a, 0]
         , shockSpeed = \_ _ -> 0
         , linearity = LDG
         }
 
-field3 :: CharField
+field3 :: CharField 3
 field3 =
     CharField
         { λ = \_ -> 1
-        , r = \_ -> col [0, 0, 1]
-        , rarefactionCurve = \pt a -> pt + col [0, 0, a]
-        , shockCurve = \pt a -> pt + col [0, 0, a]
+        , r = \_ -> [0, 0, 1]
+        , rarefactionCurve = \pt a -> pt +. [0, 0, a]
+        , shockCurve = \pt a -> pt +. [0, 0, a]
         , shockSpeed = \_ _ -> 1
         , linearity = LDG
         }
 
-dFlux' :: M.Matrix Double
-dFlux' = M.fromLists [[1, 0, 0], [0, 0, 0], [0, 0, 1]]
+dFlux' :: F.TensorBoxed '[3, 3] Double
+dFlux' = [[1, 0, 0], [0, 0, 0], [0, 0, 1]]
 
-one = (M.! (1, 1))
-two = (M.! (2, 1))
-three = (M.! (3, 1))
+a :: F.TensorBoxed '[3] Double -> Double
+a t = F.pIndex t (Proxy::Proxy '[0])
+b :: F.TensorBoxed '[3] Double -> Double
+b t = F.pIndex t (Proxy::Proxy '[1])
+c :: F.TensorBoxed '[3] Double -> Double
+c t = F.pIndex t (Proxy::Proxy '[2])
 
-system :: System
+system :: System 3
 system =
     System
-        { n = 3
-        , flux = \u -> col [-1 * one u, 0, three u]
+        { flux = \u -> [-1 * a u, 0, c u]
         , dFlux = \_ -> dFlux'
         , fields = [field1, field2, field3]
         , solveRiemann = \ul ur ->
             strengthsToFan ul (fields system)
-                [one ur - one ul, two ur - two ul, three ur - three ul]
+                [a ur - a ul, b ur - b ul, c ur - c ul]
         }

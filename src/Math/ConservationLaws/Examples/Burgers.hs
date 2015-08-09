@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 
 module Math.ConservationLaws.Examples.Burgers (
     system,
@@ -6,63 +7,68 @@ module Math.ConservationLaws.Examples.Burgers (
     nonsolution,
 ) where
 
-import qualified Data.Matrix as M
+import Data.Proxy
+
+import qualified Math.FTensor.General as F
+import Math.FTensor.Algebra
 
 import Math.Fan
-import Math.LinearAlgebra
 import Math.ConservationLaws
 
-u pt = pt M.! (1,1)
+u :: F.TensorBoxed '[1] Double -> Double
+u pt = F.pIndex pt (Proxy::Proxy '[0])
 
-field :: CharField
+box :: Double -> F.TensorBoxed '[1] Double
+box v = F.Tensor [v]
+
+field :: CharField 1
 field =
     CharField
-        { λ = \x -> x M.! (1,1)
-        , r = \_ -> 1
-        , rarefactionCurve = \pt a -> pt + col [a]
-        , shockCurve = \pt a -> pt + col [a]
-        , shockSpeed = \ul ur -> (1/2) * ((ul + ur) M.! (1,1))
+        { λ = u
+        , r = \_ -> box 1
+        , rarefactionCurve = \pt a -> box (u pt +. a)
+        , shockCurve = \pt a -> box (u pt +. a)
+        , shockSpeed = \ul ur -> 0.5 * (u ul + u ur)
         , linearity = GNL
         }
 
-system :: System
+system :: System 1
 system =
     System
-        { n = 1
-        , flux = \u -> (1/2) *. u^(2::Int)
-        , dFlux = id
+        { flux = \v -> box (0.5 * (u v)^(2::Int))
+        , dFlux = \(F.Tensor arr) -> F.Tensor arr
         , fields = [field]
-        , solveRiemann = \ul ur -> strengthsToFan ul [field] [u $ ur - ul]
+        , solveRiemann = \ul ur -> strengthsToFan ul [field] [u ur - u ul]
         }
 
-solution1 :: WaveFan
+solution1 :: WaveFan 1
 solution1 =
-    Fan [(1, SWave Shock {speed = 0.5, sFamily = 0})] 0
+    Fan [(box 1, SWave Shock {speed = 0.5, sFamily = 0})] (box 1)
 
 -- this is not an entropy solution
-solution2 :: WaveFan
+solution2 :: WaveFan 1
 solution2 =
-    Fan [(0, SWave Shock {speed = 0.5, sFamily = 0})] 1
+    Fan [(box 0, SWave Shock {speed = 0.5, sFamily = 0})] (box 1)
 
-solution3 :: WaveFan
+solution3 :: WaveFan 1
 solution3 =
-    Fan [(0, wave)] 1
+    Fan [(box 0, wave)] (box 1)
   where
     wave =
         RWave Rarefaction
             { speedL = 0
             , speedR = 1
-            , function = (\x -> col [x])
+            , function = box
             , rFamily = 0
             }
 
-solution4 = solveRiemann system 1 4
+solution4 = solveRiemann system (box 1) (box 4)
 
-solution5 = solveRiemann system 1 (-2)
+solution5 = solveRiemann system (box 1) (box (-2))
 
-solutions :: [WaveFan]
+solutions :: [WaveFan 1]
 solutions = [solution1, solution2, solution3, solution4, solution5]
 
-nonsolution :: WaveFan
+nonsolution :: WaveFan 1
 nonsolution =
-    Fan [(1, SWave Shock {speed = 0.5, sFamily = 0})] 2
+    Fan [(box 1, SWave Shock {speed = 0.5, sFamily = 0})] (box 2)

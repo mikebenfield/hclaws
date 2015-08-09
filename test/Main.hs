@@ -9,6 +9,7 @@ import qualified Tests.Math.ConservationLaws.Examples.Linear
 import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
 import qualified Tests.Math.ConservationLaws.Examples.TwoComponentChromatography
 import qualified Tests.Math.Curves
+import qualified Tests.Math.Differentiation
 import qualified Tests.Math.Fan
 import qualified Tests.Math.Integration
 
@@ -24,6 +25,7 @@ tests = testGroup "Tests"
   , Tests.Math.ConservationLaws.FrontTracking.tests
   , Tests.Math.ConservationLaws.tests
   , Tests.Math.Curves.tests
+  , Tests.Math.Differentiation.tests
   , Tests.Math.Fan.tests
   , Tests.Math.Integration.tests
   ]

@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 
 module Math.ConservationLaws.Examples.ShallowWater (
     system,
@@ -5,23 +6,27 @@ module Math.ConservationLaws.Examples.ShallowWater (
     solution2, solution3, solution4, solution5,
 ) where
 
-import Data.Matrix ((!), fromLists)
+import Data.Proxy
+
+import Math.FTensor.Algebra
+import Math.FTensor.General as F
 
 import Math.Fan
-import Math.LinearAlgebra
 import Math.ConservationLaws
 
-h m = m ! (1, 1)
-q m = m ! (2, 1)
+h :: F.TensorBoxed '[2] Double -> Double
+h t = F.pIndex t (Proxy::Proxy '[0])
+q :: F.TensorBoxed '[2] Double -> Double
+q t = F.pIndex t (Proxy::Proxy '[1])
 v m = (q m) / (h m)
 
 rarefaction1 m a =
-    col [hn, hn * (a*2/3 + (q m) / (h m))]
+    [hn, hn * (a*2/3 + (q m) / (h m))]
   where
     hn = (sqrt (h m) - a/3)**2
 
 shock1 m a =
-    col [hn, (q m) * hn / h0 - hn * (hn-h0) * sqrt (1/hn + 1/h0) / sqrt 2]
+    [hn, (q m) * hn / h0 - hn * (hn-h0) * sqrt (1/hn + 1/h0) / sqrt 2]
   where
     h0 = h m
     hn = h0 - a
@@ -31,11 +36,11 @@ speed1 ul ur =
   where
     hr = h ur
 
-field1 :: CharField
+field1 :: CharField 2
 field1 =
     CharField
         { λ = \m -> (q m) / (h m) - sqrt (h m)
-        , r = \m -> (-2/3) *. col [sqrt (h m), (q m) / sqrt (h m) - (h m)]
+        , r = \m -> (-2/3) *: [sqrt (h m), (q m) / sqrt (h m) - (h m)]
         , rarefactionCurve = rarefaction1
         , shockCurve = shock1
         , shockSpeed = speed1
@@ -43,12 +48,12 @@ field1 =
         }
 
 rarefaction2 m a =
-    col [hn, hn * (a*2/3 + (q m) / (h m))]
+    [hn, hn * (a*2/3 + (q m) / (h m))]
   where
     hn = (sqrt (h m) + a/3)**2
 
 shock2 m a =
-    col [hn, (q m) * hn / h0 + hn * (hn-h0) * sqrt (1/hn + 1/h0) / sqrt 2]
+    [hn, (q m) * hn / h0 + hn * (hn-h0) * sqrt (1/hn + 1/h0) / sqrt 2]
   where
     h0 = h m
     hn = h0 + a
@@ -58,11 +63,11 @@ speed2 ul ur =
   where
     hr = h ur
 
-field2 :: CharField
+field2 :: CharField 2
 field2 =
     CharField
         { λ = \m -> (q m) / (h m) + sqrt (h m)
-        , r = \m -> (2/3) *. col [sqrt (h m), (q m) / sqrt (h m) + (h m)]
+        , r = \m -> (2/3) *: [sqrt (h m), (q m) / sqrt (h m) + (h m)]
         , rarefactionCurve = rarefaction2
         , shockCurve = shock2
         , shockSpeed = speed2
@@ -76,7 +81,7 @@ newtonN :: (Double -> Double) -> (Double -> Double) -> Double -> Int -> Double
 newtonN _ _ x0 0 = x0
 newtonN f f' x0 n = newtonN f f' (newton1 f f' x0) (n-1)
 
-solveRiemann' :: Mat -> Mat -> WaveFan
+solveRiemann' :: Vector 2 -> Vector 2 -> WaveFan 2
 solveRiemann' uL uR
   | hL <= 0 || hR <= 0 || r2 uR >= r1 uL = -- region V or out of domain
     error "ShallowWater solveRiemann: out of domain"
@@ -92,14 +97,14 @@ solveRiemann' uL uR
   | r2 uR < r2 uL && s1 uR > s1 uL = -- region I, S1.R2
     let hM = newtonN (f hR hL vR vL) (f' hR hL) ((hL+hR)/2) 50
         qM = hM * (vL - (1 / sqrt 2) * (hM-hL) * c hM hL)
-        uM = col [hM, qM]
+        uM = [hM, qM]
     in
     waveFan uM shockWave rarefactionWave
   | r1 uR > r1 uL && r2 uR > r2 uL = -- region II, R1.R2
     let
         hM = ((2 * (sqrt hR + sqrt hL) - vR + vL) / 4)^(2::Int)
         qM = (r1 uL) * hM - 2 * hM**1.5
-        uM = col [hM, qM]
+        uM = [hM, qM]
     in
     waveFan uM rarefactionWave rarefactionWave
   | r1 uR < r1 uL && s2 uR > s2 uL = -- region III, R1.S2
@@ -109,21 +114,22 @@ solveRiemann' uL uR
         -- reversed
         hM = newtonN (f hL hR vL vR) (f' hL hR) ((hL+hR)/2) 50
         qM = (r1 uL) * hM - 2 * hM**1.5
-        uM = col [hM, qM]
+        uM = [hM, qM]
     in
     waveFan uM rarefactionWave shockWave
   | s1 uR < s1 uL && s2 uR < s2 uL = -- region IV, S1.S2
     let hM = newtonN g g' ((hL+hR)/2) 50
         qM = hM * (vL - (hM-hL) * c hM hL / sqrt 2)
-        uM = col [hM, qM]
+        uM = [hM, qM]
     in
     waveFan uM shockWave shockWave
   | otherwise =
       error "ShallowWater solveRiemann: can't happen"
   where
-    waveFan :: Mat -> (CharField -> Int -> Mat -> Mat -> Wave)
-            -> (CharField -> Int -> Mat -> Mat -> Wave)
-            -> WaveFan
+    waveFan
+        :: Vector 2 -> (CharField 2 -> Int -> Vector 2 -> Vector 2 -> Wave 2)
+        -> (CharField 2 -> Int -> Vector 2 -> Vector 2 -> Wave 2)
+        -> WaveFan 2
     waveFan uM waveA waveB =
         Fan [(uL, waveA field1 1 uL uM), (uM, waveB field2 2 uM uR)] uR
     hL = h uL
@@ -151,25 +157,24 @@ solveRiemann' uL uR
         (q pt) - qL * (h pt) / hL -
             (h pt) * (h pt - hL) * sqrt (1/(h pt) + 1/hL) / sqrt 2
 
-system :: System
+system :: System 2
 system =
     System
-        { n = 2
-        , flux = \m -> col [q m, (q m)**2 / (h m) + (h m)^(2::Int)/2]
-        , dFlux = \m -> fromLists [[0, 1], [(h m) - (v m)^(2::Int), 2 * (v m)]]
+        { flux = \m -> [q m, (q m)**2 / (h m) + (h m)^(2::Int)/2]
+        , dFlux = \m -> [[0, 1], [(h m) - (v m)^(2::Int), 2 * (v m)]]
         , fields = [field1, field2]
         , solveRiemann = solveRiemann'
         }
 
-solution1 :: WaveFan
+solution1 :: WaveFan 2
 solution1 =
     Fan [(pt1, SWave Shock {speed = speed', sFamily = 0})] pt2
   where
-    pt1 = col [1,1]
+    pt1 = [1,1]
     pt2 = shock1 pt1 (-1)
     speed' = speed1 pt1 pt2
 
-solution2 = solveRiemann system (col [1,1]) (col [2,2])
-solution3 = solveRiemann system (col [1,1]) (col [1,2])
-solution4 = solveRiemann system (col [1,1]) (col [0.5,0.5])
-solution5 = solveRiemann system (col [1,1]) (col [1,0])
+solution2 = solveRiemann system [1,1] [2,2]
+solution3 = solveRiemann system [1,1] [1,2]
+solution4 = solveRiemann system [1,1] [0.5,0.5]
+solution5 = solveRiemann system [1,1] [1,0]

@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Tests.Math.ConservationLaws.Examples.Linear (
     tests
@@ -25,6 +27,7 @@ properties = testGroup "Properties"
     [
     ]
 
+testCurves :: [Curve]
 testCurves =
     [ box (point (-5) 1) 20 20
     , box (point (-10) 2) 50 3
@@ -34,16 +37,16 @@ testCurves =
     , circle (point 1 2) 1
     ]
 
-testWaveFan :: WaveFan -> String -> TestTree
+testWaveFan :: WaveFan 3 -> String -> TestTree
 testWaveFan wf name =
     testCase name $ mapM_ intOnCurve testCurves
   where
     intOnCurve cc =
-        integrateFanOnCurve cc system wf @?~ col [0, 0, 0]
+        integrateFanOnCurve cc system wf @?~ [0, 0, 0]
 
-solution1 = solveRiemann L.system (col [1, 2, 3]) (col [2, 3, 4])
+solution1 = solveRiemann L.system [1, 2, 3] [2, 3, 4]
 
-solution2 = solveRiemann L.system (col [17, 24, 29]) (col [-100, -1, 3124])
+solution2 = solveRiemann L.system [17, 24, 29] [-100, -1, 3124]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests"

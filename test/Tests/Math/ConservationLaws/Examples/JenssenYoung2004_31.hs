@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31 (
     tests
@@ -29,6 +31,7 @@ properties = testGroup "Properties"
 
 lambda = 1
 
+testCurves :: [Curve]
 testCurves =
     [ box (point (-5) 1) 20 20
     , box (point (-10) 2) 50 3
@@ -38,12 +41,12 @@ testCurves =
     , circle (point 1 2) 1
     ]
 
-testWaveFan :: CL.WaveFan -> String -> TestTree
+testWaveFan :: CL.WaveFan 3 -> String -> TestTree
 testWaveFan wf name =
-    HU.testCase name $ mapM_ intOnCurve [testCurves !! 1]
+    HU.testCase name $ mapM_ intOnCurve testCurves
   where
     intOnCurve cc =
-        CL.integrateFanOnCurve cc (JY.system 1) wf @?~ col [0,0,0]
+        CL.integrateFanOnCurve cc (JY.system 1) wf @?~ [0,0,0]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $

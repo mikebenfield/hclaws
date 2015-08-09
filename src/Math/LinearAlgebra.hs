@@ -1,19 +1,14 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Math.LinearAlgebra (
     Point(..),
     point,
-    row,
-    col,
-    getRows,
-    getCols,
-    toList,
-    (*.),
-    Mat,
-    normP,
+    Normable(..),
 ) where
 
-import qualified Data.Matrix as M
-import qualified Data.Vector as V
+import qualified Math.FTensor.Algebra as A
+import qualified Math.FTensor.General as F
 
 data Point = Point
     { x :: !Double
@@ -21,32 +16,33 @@ data Point = Point
     }
     deriving (Show, Eq)
 
+instance A.Additive Point where
+    (+.) p1 p2 = Point (x p1 + x p2) (t p1 + t p2)
+
+instance A.WithZero Point where
+    zero = Point 0 0
+
+instance A.WithNegatives Point where
+    neg Point{..} = Point (negate x) (negate t)
+    (-.) p1 p2 = Point (x p1 - x p2) (t p1 - t p2)
+
 point :: Double -> Double -> Point
 point x' t' = Point {x=x', t=t'}
 
-row :: [a] -> M.Matrix a
-row list = M.fromList 1 (length list) list
+class Normable a where
+    normP :: Double -> a -> Double
 
-col :: [a] -> M.Matrix a
-col list = M.fromList (length list) 1 list
+instance Normable Double where
+    normP _ = abs
 
-getRows :: M.Matrix a -> [V.Vector a]
-getRows m = fmap (\i -> M.getRow i m) [1..M.nrows m]
+instance Normable (F.TensorBoxed dims Double) where
+    normP p t
+      | p < 1 = error "normP called with p<1"
+      | p == (1/0) = maximum $ fmap abs t
+      | otherwise = (sum $ fmap (\x -> (abs x)**p) t)**(1/p)
 
-getCols :: M.Matrix a -> [V.Vector a]
-getCols m = fmap (\i -> M.getCol i m) [1..M.ncols m]
-
-toList :: M.Matrix a -> [a]
-toList m = [m M.! (i,j) | i <- [1, M.nrows m], j <- [1, M.ncols m]]
-
-infixl 7 *.
-(*.) :: Num a => a -> M.Matrix a -> M.Matrix a
-(*.) = M.scaleMatrix
-
-type Mat = M.Matrix Double
-
-normP :: Double -> Mat -> Double
-normP p m
-  | p < 1 = error "normP called with p<1"
-  | p == (1/0) = maximum $ map abs $ toList m
-  | otherwise = (sum $ map (\x -> (abs x)**p) $ toList m)**(1/p)
+instance Normable Point where
+    normP p Point{..}
+      | p < 1 = error "normP called with p<1"
+      | p == (1/0) = max (abs x) (abs t)
+      | otherwise = ((abs x)**p + (abs t)**p)**(1/p)

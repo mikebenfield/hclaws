@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 
 module Tests.Math.ConservationLaws (
     tests
@@ -5,18 +6,10 @@ module Tests.Math.ConservationLaws (
 
 import Test.Tasty (TestTree, testGroup)
 import qualified Test.Tasty.QuickCheck as QC
+import Test.Tasty.TH (testGroupGenerator)
 
 import qualified Math.ConservationLaws as CL
+import qualified Math.ConservationLaws.Examples.Burgers as B
 
 tests :: TestTree
-tests = testGroup "ConservationLaws" [properties, unitTests]
-
-properties :: TestTree
-properties = testGroup "Properties"
-    [
-    ]
-
-unitTests :: TestTree
-unitTests = testGroup "Unit Tests"
-    [
-    ]
+tests = $(testGroupGenerator)

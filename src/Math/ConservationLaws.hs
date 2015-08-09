@@ -1,5 +1,9 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Math.ConservationLaws (
+    Vector,
     CharField(..),
     System(..),
     Wave(..),
@@ -17,52 +21,62 @@ module Math.ConservationLaws (
 ) where
 
 import Prelude hiding (length)
+import Control.Monad.ST
 
-import qualified Data.Matrix as M
+import GHC.TypeLits
+
 import qualified Data.Vector as V
+
+import qualified Math.FTensor.General as F
+import qualified Math.FTensor.Lib.Array as A
 
 import Math.LinearAlgebra
 import Math.Fan
 import qualified Math.Curves as C
 import qualified Math.Integration as I
 
-type MatField = Mat -> Mat
-type ScalarField = Mat -> Double
-type Curve = Double -> Mat
-type BasePointCurve = Mat -> Curve
-type PotentialSolution = Point -> Mat
+type Vector (dim::Nat) = F.TensorBoxed '[dim] Double
+
+type VectorField (dim::Nat) = Vector dim -> Vector dim
+
+type ScalarField (dim::Nat) = Vector dim -> Double
+
+type Curve (dim::Nat) = Double -> Vector dim
+
+type BasePointCurve (dim::Nat) = Vector dim -> Curve dim
+
+type PotentialSolution (dim::Nat) = Point -> Vector dim
 
 data Linearity = GNL | LDG | Neither
     deriving (Eq, Show)
 
-data CharField =
+data CharField (n::Nat) =
     CharField
-        { λ :: ScalarField
-        , r :: MatField
-        , rarefactionCurve :: BasePointCurve
-        , shockCurve :: BasePointCurve
-        , shockSpeed :: Mat -> Mat -> Double
+        { λ :: ScalarField n
+        , r :: VectorField n
+        , rarefactionCurve :: BasePointCurve n
+        , shockCurve :: BasePointCurve n
+        , shockSpeed :: Vector n -> Vector n -> Double
         , linearity :: Linearity
         }
 
-data System =
+data System (n::Nat) =
     System
-        { n :: Int
-        , flux :: MatField
-        , dFlux :: MatField
-        , fields :: [CharField]
-        , solveRiemann :: Mat -> Mat -> WaveFan
+        { flux :: VectorField n
+        , dFlux :: Vector n -> F.TensorBoxed '[n, n] Double
+        , fields :: [CharField n]
+        , solveRiemann :: Vector n -> Vector n -> WaveFan n
         }
 
-data Rarefaction =
+data Rarefaction (n::Nat) =
     Rarefaction
         { speedL :: Double
         , speedR :: Double
-        , function :: Double -> Mat
+        , function :: Double -> Vector n
         , rFamily :: Int
         }
 
-instance Show Rarefaction where
+instance Show (Rarefaction n) where
     show Rarefaction{..} =
         "Rarefaction {speedL = " ++ show speedL ++
             ", speedR = " ++ show speedR ++
@@ -74,14 +88,14 @@ data Shock =
         , sFamily :: Int
         } deriving Show
 
-data Wave = RWave Rarefaction | SWave Shock
+data Wave (n::Nat) = RWave (Rarefaction n) | SWave Shock
     deriving Show
 
-fastestSpeed :: Wave -> Double
+fastestSpeed :: Wave n -> Double
 fastestSpeed (RWave Rarefaction{..}) = speedR
 fastestSpeed (SWave Shock{..}) = speed
 
-rarefactionWave :: CharField -> Int -> Mat -> Mat -> Wave
+rarefactionWave :: CharField n -> Int -> Vector n -> Vector n -> Wave n
 rarefactionWave field familyI uL uR =
     RWave Rarefaction
         { speedL = λ field uL
@@ -90,14 +104,14 @@ rarefactionWave field familyI uL uR =
         , rFamily = familyI
         }
 
-shockWave :: CharField -> Int -> Mat -> Mat -> Wave
+shockWave :: CharField n -> Int -> Vector n -> Vector n -> Wave n
 shockWave field familyI uL uR =
     SWave Shock {speed = shockSpeed field uL uR, sFamily = familyI}
 
-type WaveFan = Fan Mat Wave
+type WaveFan (n::Nat) = Fan (Vector n) (Wave n)
 
 -- can't use findOuterAt, because we don't need just the value
-atSpeed :: WaveFan -> Double -> Mat
+atSpeed :: WaveFan n -> Double -> Vector n
 atSpeed (Fan v last) speed =
     case V.find (\(_, wave) -> speed <= fastestSpeed wave) v of
         Nothing -> last
@@ -105,24 +119,40 @@ atSpeed (Fan v last) speed =
             | speed > speedL -> function speed
         Just (value, _) -> value
 
-atPoint :: WaveFan -> Point -> Mat
+atPoint :: WaveFan n -> Point -> Vector n
 atPoint wf Point{..} = atSpeed wf (x/t)
 
-solutionForm :: System -> PotentialSolution -> Point -> Mat
-solutionForm s u pt =
-    upt M.<|> negate (flux s upt)
+solutionForm
+    :: System n
+    -> PotentialSolution n
+    -> Point
+    -> F.TensorBoxed '[n, 2] Double
+solutionForm s u pt = F.Tensor $ runST $ do
+    newArr <- A.new (2*len)
+    let writeOne j =
+            let idx = 2*j
+            in
+            A.write newArr idx (A.index uptArr j) >>
+                A.write newArr (idx+1) (- A.index fuptArr j)
+        loop j
+          | j >= len = return ()
+          | otherwise = writeOne j >> loop (j+1)
+    loop 0
+    A.freeze newArr
   where
-    upt = u pt
+    len = A.length uptArr
+    upt@(F.Tensor uptArr) = u pt
+    F.Tensor fuptArr = flux s upt
 
 accuracy = 0.000001
 
-integrateFanOnCurve :: C.Curve -> System -> WaveFan -> Mat
+integrateFanOnCurve :: KnownNat n => C.Curve -> System n -> WaveFan n -> Vector n
 integrateFanOnCurve c s wf =
     I.adaptiveSimpsonLineIntegral accuracy c solutionForm' 0 1
   where
     solutionForm' = solutionForm s $ atPoint wf
 
-strengthsToFan :: Mat -> [CharField] -> [Double] -> WaveFan
+strengthsToFan :: Vector n -> [CharField n] -> [Double] -> WaveFan n
 strengthsToFan uL fields strengths =
     Fan (V.generate (V.length shifted) unshift) (fst $ V.last shifted)
   where

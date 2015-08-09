@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedLists#-}
 
 module Tests.Math.ConservationLaws.Examples.ShallowWater (
     tests
@@ -27,6 +29,7 @@ properties = testGroup "Properties"
     [
     ]
 
+testCurves :: [Curve]
 testCurves =
     [ box (point (-5) 1) 20 20
     , box (point (-10) 2) 50 3
@@ -36,14 +39,14 @@ testCurves =
     , circle (point 1 2) 1
     ]
 
-testWaveFan :: CL.WaveFan -> String -> TestTree
+testWaveFan :: CL.WaveFan 2 -> String -> TestTree
 testWaveFan wf name =
     HU.testCase name $ mapM_ intOnCurve testCurves
   where
     intOnCurve cc =
-        CL.integrateFanOnCurve cc SW.system wf @?~ col [0,0]
+        CL.integrateFanOnCurve cc SW.system wf @?~ [0,0]
 
-solution2 = CL.solveRiemann SW.system (col [1,1]) (col [2,2])
+solution2 = CL.solveRiemann SW.system [1,1] [2,2]
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
     [ testWaveFan SW.solution1 "manual solution 1"

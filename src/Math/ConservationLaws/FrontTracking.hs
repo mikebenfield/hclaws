@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Math.ConservationLaws.FrontTracking (
     Piecewise,
@@ -15,23 +17,24 @@ module Math.ConservationLaws.FrontTracking (
     trackFronts,
 ) where
 
-import Data.Maybe (isJust, fromMaybe)
+import GHC.TypeLits
+
+import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 
 import qualified Data.Vector as V
 
 import Math.ConservationLaws
 import Math.Fan
-import Math.LinearAlgebra
 
-type Piecewise = Fan Mat Double
+type Piecewise (n::Nat) = Fan (Vector n) Double
 
-evalPiecewise :: Piecewise -> Double -> Mat
+evalPiecewise :: Piecewise n -> Double -> Vector n
 evalPiecewise pw x = findOuterAt (compare x) pw
 
-type PiecewiseXt = Fan Mat (Double, Double)
+type PiecewiseXt (n::Nat) = Fan (Vector n) (Double, Double)
 
-evalPiecewiseXt :: PiecewiseXt -> (Double, Double) -> Mat
+evalPiecewiseXt :: PiecewiseXt n -> (Double, Double) -> Vector n
 evalPiecewiseXt pw (x, t) = findOuterAt (\(x', s) -> compare x (x' + s*t)) pw
 
 data FrontType = RFront | SFront
@@ -44,7 +47,6 @@ data Front =
         , family :: Int
         , speed :: Double
         , frontType :: FrontType
-        , generation :: Int
         }
     deriving (Show)
 
@@ -63,33 +65,31 @@ instance Ord Front where
             (EQ, c, _) -> c
             (c, _, _) -> c
 
-type GenerationInfo = V.Vector Int
-
 data StagedDiscontinuity
   = FrontD Front
-  | Break Double GenerationInfo
+  | Break Double
 
-data Stage = Stage Double (Fan Mat StagedDiscontinuity)
+data Stage (n::Nat) = Stage Double (Fan (Vector n) StagedDiscontinuity)
 
-piecewiseToStage :: Double -> Int -> Piecewise -> Stage
-piecewiseToStage time n (Fan vec last) =
+piecewiseToStage :: Double -> Piecewise n -> Stage n
+piecewiseToStage time (Fan vec last) =
     Stage
         time
         (Fan
-            (V.map (\(mat, dbl) -> (mat, Break dbl $ V.replicate n 0)) vec)
+            (V.map (\(mat, dbl) -> (mat, Break dbl)) vec)
             last)
 
-data Output =
+data Output (n::Nat) =
     Output
         { fronts :: Set.Set Front
-        , solution :: Fan PiecewiseXt Double
-        , stage :: Stage
+        , solution :: Fan (PiecewiseXt n) Double
+        , stage :: Stage n
         }
 
-validUntil :: Output -> Double
+validUntil :: Output n -> Double
 validUntil Output { stage = Stage time _ } = time
 
-evaluate :: Output -> (Double, Double) -> Mat
+evaluate :: Output n -> (Double, Double) -> Vector n
 evaluate Output{..} (x, t) =
     evalPiecewiseXt pwxt (x, (t - time))
   where
@@ -97,28 +97,33 @@ evaluate Output{..} (x, t) =
     time = if i == 0 then 0 else indexI solution (i-1)
     i = findIndexAt (compare t) solution
 
-data Configuration =
+data Configuration (n::Nat) =
     Configuration
         { stopAtTime :: Maybe Double
         , stopAfterSteps :: Maybe Int
         , delta :: Double
-        , maxGeneration :: Maybe Int
-        , previousOutput :: Maybe Output
+        , previousOutput :: Maybe (Output n)
         , epsilon :: Double
-        , initial :: Piecewise
+        , initial :: Piecewise n
         }
 
-trackFronts :: Configuration -> System -> Output
+trackFronts :: Configuration n -> System n -> Output n
 trackFronts config@Configuration{..} system =
     loop config system 0 $ fromMaybe newOutput previousOutput
   where
     newOutput = Output
         { fronts = Set.empty
-        , solution = Fan [] (Fan [] 0)
-        , stage = piecewiseToStage 0 (n system) initial
+        , solution = Fan [] undefined
+        , stage = piecewiseToStage 0 initial
         }
 
-loop :: Configuration -> System -> Int -> Output -> Output
+loop
+    :: forall (n::Nat)
+    . Configuration n
+    -> System n
+    -> Int
+    -> Output n
+    -> Output n
 loop config@Configuration{..} system m output@Output{..} =
     case (stopAfterSteps, stopAtTime) of
         (Just steps, _) | m >= steps -> output
@@ -162,33 +167,19 @@ loop config@Configuration{..} system m output@Output{..} =
         insertElements fronts $ V.filter ((==thisTime) . snd . origin) $
             V.map snd currentFronts
 
-    nextStage :: Stage
+    nextStage :: Stage n
     nextStage = Stage
         nextTime
         (Fan
             (V.map stageIntersection intersected)
             (lastO fan))
 
-    stageIntersection :: (Int, Int) -> (Mat, StagedDiscontinuity)
+    stageIntersection :: (Int, Int) -> (Vector n, StagedDiscontinuity)
     stageIntersection (i, j)
       | i + 1 == j = (iM, FrontD iF)
       | otherwise =
-        (iM, Break
-            (nextXs V.! i)
-            (V.map
-                (\fam -> if isFamilyInvolved fam then 0 else sum)
-                [0..n system-1]))
+        (iM, Break (nextXs V.! i))
       where
-        isFamilyInvolved i =
-            isJust $ V.find ((== i) . family . snd) currentFronts
-        sum = V.foldl' (+) 0 familiesMaxGen
-        familiesMaxGen = V.map maxGenOfFamily [0..n system-1]
-        maxGenOfFamily f = V.foldl'
-            (\m Front{..} ->
-                if family == f && generation > m then generation else m)
-            0
-            relevantFronts
-        relevantFronts = V.map snd $ V.slice i (j-i) currentFronts
         (iM, iF) = currentFronts V.! i
 
     -- If (i, j) is in intersected, then the indices of currentFronts
@@ -228,7 +219,7 @@ loop config@Configuration{..} system m output@Output{..} =
         in
         if s <= s' then 1/0 else thisTime + (nowX' - nowX) / (s - s')
 
-    piecewiseXt :: PiecewiseXt
+    piecewiseXt :: PiecewiseXt n
     piecewiseXt = Fan
         (V.map (\(mat, f) -> (mat, frontToNow f)) currentFronts)
         (indexO fan (iLength fan))
@@ -237,7 +228,7 @@ loop config@Configuration{..} system m output@Output{..} =
     frontToNow Front {origin = (x, t), speed = s} =
         (x + s * (thisTime - t), s)
 
-    currentFronts :: V.Vector (Mat, Front)
+    currentFronts :: V.Vector (Vector n, Front)
     currentFronts =
         V.concat $ V.toList $ V.map
             (\i -> solveDiscontinuity thisTime
@@ -249,42 +240,25 @@ loop config@Configuration{..} system m output@Output{..} =
     solveDiscontinuity
         :: Double
         -> StagedDiscontinuity
-        -> Mat
-        -> Mat
-        -> V.Vector (Mat, Front)
+        -> Vector n
+        -> Vector n
+        -> V.Vector (Vector n, Front)
     solveDiscontinuity _ (FrontD front) uL _ = [(uL, front)]
-    solveDiscontinuity thisTime (Break x gi) uL uR =
-        approximateRiemann (x, thisTime) gi uL uR
+    solveDiscontinuity thisTime (Break x) uL uR =
+        approximateRiemann (x, thisTime) uL uR
 
     approximateRiemann
         :: (Double, Double)
-        -> GenerationInfo
-        -> Mat
-        -> Mat
-        -> V.Vector (Mat, Front)
-    approximateRiemann origin' gi uL uR =
-        case maxGeneration of
-            Nothing -> unpruned
-            Just g -> V.unfoldrN (V.length unpruned) (prune g) (0, Nothing)
+        -> Vector n
+        -> Vector n
+        -> V.Vector (Vector n, Front)
+    approximateRiemann origin' uL uR =
+        V.concat $ V.toList $ V.map approximateWave solnVec
       where
-        prune :: Int -> (Int, Maybe Mat) -> Maybe ((Mat, Front), (Int, Maybe Mat))
-        prune g (i, maybeMat) = case maybeMat of
-            _ | i >= V.length unpruned -> Nothing
-            Nothing
-              | toKeep -> Just ((m1, front), (i+1, Nothing))
-              | otherwise -> prune g (i+1, Just m1)
-            Just m
-              | toKeep -> Just ((m, front), (i+1, Nothing))
-              | otherwise -> prune g (i+1, Just m)
-          where
-            (m1, front) = unpruned V.! i
-            toKeep = generation front <= g
-
-        unpruned = V.concat $ V.toList $ V.map approximateWave solnVec
         Fan solnVec _ = solveRiemann system uL uR
 
-        approximateWave :: (Mat, Wave) -> V.Vector (Mat, Front)
-        approximateWave (_, RWave r) = approximateRarefaction origin' gi r
+        approximateWave :: (Vector n, Wave n) -> V.Vector (Vector n, Front)
+        approximateWave (_, RWave r) = approximateRarefaction origin' r
         approximateWave (val, SWave s) =
             [(val, Front
                 { origin = origin'
@@ -292,15 +266,13 @@ loop config@Configuration{..} system m output@Output{..} =
                 , family = sFamily s
                 , speed = Math.ConservationLaws.speed s
                 , frontType = SFront
-                , generation = gi V.! sFamily s
                 })]
 
     approximateRarefaction
         :: (Double, Double)
-        -> GenerationInfo
-        -> Rarefaction
-        -> V.Vector (Mat, Front)
-    approximateRarefaction origin' gi Rarefaction{..} =
+        -> Rarefaction n
+        -> V.Vector (Vector n, Front)
+    approximateRarefaction origin' Rarefaction{..} =
         V.zip vals fronts
       where
         speeds = V.generate (k+1) (\i -> speedL + deltaHat * fromIntegral i)
@@ -317,5 +289,4 @@ loop config@Configuration{..} system m output@Output{..} =
             , family = rFamily
             , speed = s
             , frontType = RFront
-            , generation = gi V.! rFamily
             }
