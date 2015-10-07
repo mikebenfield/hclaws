@@ -21,6 +21,7 @@ library
                        Math.ConservationLaws.Examples.Burgers
                        Math.ConservationLaws.Examples.Linear
                        Math.ConservationLaws.Examples.ShallowWater
+                       Math.ConservationLaws.Examples.TveitoWinther1995_3
                        Math.ConservationLaws.Examples.TwoComponentChromatography
                        Math.ConservationLaws.Examples.JenssenYoung2004_31
   build-depends:       base >=4.7 && <4.9,

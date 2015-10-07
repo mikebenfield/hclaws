@@ -25,7 +25,7 @@ import Data.Bits (shiftR)
 import qualified Data.Vector as V
 
 data Fan outer inner = Fan (V.Vector (outer, inner)) outer
-    deriving (Eq)
+    deriving (Eq, Show)
 
 iLength :: Fan outer inner -> Int
 iLength (Fan vec _) = V.length vec

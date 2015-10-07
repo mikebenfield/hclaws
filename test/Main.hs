@@ -7,6 +7,7 @@ import qualified Tests.Math.ConservationLaws.Examples.Burgers
 import qualified Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31
 import qualified Tests.Math.ConservationLaws.Examples.Linear
 import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
+import qualified Tests.Math.ConservationLaws.Examples.TveitoWinther1995_3
 import qualified Tests.Math.ConservationLaws.Examples.TwoComponentChromatography
 import qualified Tests.Math.Curves
 import qualified Tests.Math.Differentiation
@@ -22,6 +23,7 @@ tests = testGroup "Tests"
   , Tests.Math.ConservationLaws.Examples.Linear.tests
   , Tests.Math.ConservationLaws.Examples.ShallowWater.tests
   , Tests.Math.ConservationLaws.Examples.TwoComponentChromatography.tests
+  , Tests.Math.ConservationLaws.Examples.TveitoWinther1995_3.tests
   , Tests.Math.ConservationLaws.FrontTracking.tests
   , Tests.Math.ConservationLaws.tests
   , Tests.Math.Curves.tests
