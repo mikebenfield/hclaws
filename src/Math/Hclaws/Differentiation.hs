@@ -1,7 +1,7 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Math.Differentiation (
+module Math.Hclaws.Differentiation (
     -- diffVal,
     -- diff,
     -- tangentVal,

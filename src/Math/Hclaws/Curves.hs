@@ -1,11 +1,11 @@
 
-module Math.Curves (
+module Math.Hclaws.Curves (
     Curve(..),
     box,
     circle
 ) where
 
-import Math.LinearAlgebra
+import Math.Hclaws.LinearAlgebra
 
 data Curve = Curve
     { curve :: Double -> Point

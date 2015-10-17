@@ -7,7 +7,7 @@ import qualified Test.Tasty.HUnit as HU
 
 import Math.FTensor.Algebra
 
-import Math.LinearAlgebra
+import Math.Hclaws.LinearAlgebra
 
 -- since the goal is not to test the accuracy of the numerical algorithms,
 -- maybe a large epsilon is reasonable?

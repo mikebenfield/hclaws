@@ -3,7 +3,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE OverloadedLists #-}
 
-module Tests.Math.Differentiation (
+module Tests.Math.Hclaws.Differentiation (
     tests
 ) where
 
@@ -15,7 +15,7 @@ import Test.Tasty.TH (testGroupGenerator)
 
 import Test.HUnitExtras
 
-import qualified Math.Differentiation as D
+import qualified Math.Hclaws.Differentiation as D
 
 tests :: TestTree
 tests = $(testGroupGenerator)

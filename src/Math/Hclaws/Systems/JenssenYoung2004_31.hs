@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Math.ConservationLaws.Examples.JenssenYoung2004_31 (
+module Math.Hclaws.Systems.JenssenYoung2004_31 (
     system,
     solution1,
     solution2,
@@ -12,7 +12,7 @@ import Data.Proxy
 
 import Math.FTensor.General as F
 
-import Math.ConservationLaws
+import Math.Hclaws.ConservationLaws
 
 u :: F.TensorBoxed '[3] Double -> Double
 u t = F.pIndex t (Proxy::Proxy '[0])

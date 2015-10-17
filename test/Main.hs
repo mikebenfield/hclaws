@@ -1,33 +1,33 @@
 
 import Test.Tasty
 
-import qualified Tests.Math.ConservationLaws
-import qualified Tests.Math.ConservationLaws.FrontTracking
-import qualified Tests.Math.ConservationLaws.Examples.Burgers
-import qualified Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31
-import qualified Tests.Math.ConservationLaws.Examples.Linear
-import qualified Tests.Math.ConservationLaws.Examples.ShallowWater
-import qualified Tests.Math.ConservationLaws.Examples.TveitoWinther1995_3
-import qualified Tests.Math.ConservationLaws.Examples.TwoComponentChromatography
-import qualified Tests.Math.Curves
-import qualified Tests.Math.Differentiation
-import qualified Tests.Math.Fan
-import qualified Tests.Math.Integration
+import qualified Tests.Math.Hclaws.ConservationLaws
+import qualified Tests.Math.Hclaws.FrontTracking
+import qualified Tests.Math.Hclaws.Systems.Burgers
+import qualified Tests.Math.Hclaws.Systems.JenssenYoung2004_31
+import qualified Tests.Math.Hclaws.Systems.Linear
+import qualified Tests.Math.Hclaws.Systems.ShallowWater
+import qualified Tests.Math.Hclaws.Systems.TveitoWinther1995_3
+import qualified Tests.Math.Hclaws.Systems.TwoComponentChromatography
+import qualified Tests.Math.Hclaws.Curves
+import qualified Tests.Math.Hclaws.Differentiation
+import qualified Tests.Math.Hclaws.Fan
+import qualified Tests.Math.Hclaws.Integration
 
 main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Tests"
-  [ Tests.Math.ConservationLaws.Examples.Burgers.tests
-  , Tests.Math.ConservationLaws.Examples.JenssenYoung2004_31.tests
-  , Tests.Math.ConservationLaws.Examples.Linear.tests
-  , Tests.Math.ConservationLaws.Examples.ShallowWater.tests
-  , Tests.Math.ConservationLaws.Examples.TwoComponentChromatography.tests
-  , Tests.Math.ConservationLaws.Examples.TveitoWinther1995_3.tests
-  , Tests.Math.ConservationLaws.FrontTracking.tests
-  , Tests.Math.ConservationLaws.tests
-  , Tests.Math.Curves.tests
-  , Tests.Math.Differentiation.tests
-  , Tests.Math.Fan.tests
-  , Tests.Math.Integration.tests
+  [ Tests.Math.Hclaws.Systems.Burgers.tests
+  , Tests.Math.Hclaws.Systems.JenssenYoung2004_31.tests
+  , Tests.Math.Hclaws.Systems.Linear.tests
+  , Tests.Math.Hclaws.Systems.ShallowWater.tests
+  , Tests.Math.Hclaws.Systems.TwoComponentChromatography.tests
+  , Tests.Math.Hclaws.Systems.TveitoWinther1995_3.tests
+  , Tests.Math.Hclaws.FrontTracking.tests
+  , Tests.Math.Hclaws.ConservationLaws.tests
+  , Tests.Math.Hclaws.Curves.tests
+  , Tests.Math.Hclaws.Differentiation.tests
+  , Tests.Math.Hclaws.Fan.tests
+  , Tests.Math.Hclaws.Integration.tests
   ]

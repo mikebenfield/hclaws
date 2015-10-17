@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedLists #-}
 
-module Tests.Math.ConservationLaws.Examples.Burgers (
+module Tests.Math.Hclaws.Systems.Burgers (
     tests
 ) where
 
@@ -11,13 +11,13 @@ import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
 import Test.HUnitExtras
-import Math.LinearAlgebra
 
-import qualified Math.ConservationLaws as CL
-import qualified Math.ConservationLaws.Examples.Burgers as B
+import qualified Math.Hclaws.ConservationLaws as CL
+import qualified Math.Hclaws.Systems.Burgers as B
 
-import Math.Curves
-import qualified Math.Integration as I
+import Math.Hclaws.Curves
+import Math.Hclaws.LinearAlgebra
+import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests = testGroup "Math.ConservationLaws.Examples.Burgers" [properties, unitTests]

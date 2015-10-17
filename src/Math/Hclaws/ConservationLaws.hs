@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Math.ConservationLaws (
+module Math.Hclaws.ConservationLaws (
     Vector,
     CharField(..),
     System(..),
@@ -30,10 +30,10 @@ import qualified Data.Vector as V
 import qualified Math.FTensor.General as F
 import qualified Math.FTensor.Lib.Array as A
 
-import Math.LinearAlgebra
-import Math.Fan
-import qualified Math.Curves as C
-import qualified Math.Integration as I
+import Math.Hclaws.LinearAlgebra
+import Math.Hclaws.Fan
+import qualified Math.Hclaws.Curves as C
+import qualified Math.Hclaws.Integration as I
 
 type Vector (dim::Nat) = F.TensorBoxed '[dim] Double
 

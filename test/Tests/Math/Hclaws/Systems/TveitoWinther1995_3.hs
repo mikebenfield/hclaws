@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Tests.Math.ConservationLaws.Examples.TveitoWinther1995_3 (
+module Tests.Math.Hclaws.Systems.TveitoWinther1995_3 (
     tests
 ) where
 
@@ -13,14 +13,14 @@ import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.TH (testGroupGenerator)
 
 import Test.HUnitExtras
-import Math.LinearAlgebra
 
-import Math.Fan
-import Math.ConservationLaws
-import qualified Math.ConservationLaws.Examples.TveitoWinther1995_3 as TW
+import Math.Hclaws.LinearAlgebra
+import Math.Hclaws.Fan
+import Math.Hclaws.ConservationLaws
+import qualified Math.Hclaws.Systems.TveitoWinther1995_3 as TW
 
-import Math.Curves
-import qualified Math.Integration as I
+import Math.Hclaws.Curves
+import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests =

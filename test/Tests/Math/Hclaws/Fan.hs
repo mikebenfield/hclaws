@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Tests.Math.Fan (
+module Tests.Math.Hclaws.Fan (
     tests
 ) where
 
@@ -12,7 +12,7 @@ import qualified Test.Tasty.SmallCheck as SC
 import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.TH (testGroupGenerator)
 
-import qualified Math.Fan as F
+import qualified Math.Hclaws.Fan as F
 
 tests = $(testGroupGenerator)
 

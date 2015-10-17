@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Examples.Linear (
+module Math.Hclaws.Systems.Linear (
     system,
 ) where
 
@@ -9,7 +9,7 @@ import Data.Proxy
 import Math.FTensor.Algebra
 import qualified Math.FTensor.General as F
 
-import Math.ConservationLaws
+import Math.Hclaws.ConservationLaws
 
 field1 :: CharField 3
 field1 =

@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Math.Integration (
+module Math.Hclaws.Integration (
     simpson,
     adaptiveSimpson,
     adaptiveSimpsonLineIntegral,
@@ -15,8 +15,8 @@ import GHC.TypeLits
 import Math.FTensor.Algebra
 import Math.FTensor.General as F
 
-import Math.Curves
-import Math.LinearAlgebra
+import Math.Hclaws.Curves
+import Math.Hclaws.LinearAlgebra
 
 simpson'
     :: (VectorSpace a, Scalar a ~ Double)

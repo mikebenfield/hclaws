@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Examples.TveitoWinther1995_3 (
+module Math.Hclaws.Systems.TveitoWinther1995_3 (
     system
 ) where
 
@@ -8,8 +8,8 @@ import Data.Proxy
 
 import Math.FTensor.General as F
 
-import Math.ConservationLaws
-import Math.Fan
+import Math.Hclaws.ConservationLaws
+import Math.Hclaws.Fan
 
 u :: Vector 2 -> Double
 u t = F.pIndex t (Proxy::Proxy '[0])

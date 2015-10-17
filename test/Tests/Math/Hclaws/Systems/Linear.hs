@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedLists #-}
 
-module Tests.Math.ConservationLaws.Examples.Linear (
+module Tests.Math.Hclaws.Systems.Linear (
     tests
 ) where
 
@@ -12,12 +12,12 @@ import qualified Test.Tasty.SmallCheck as SC
 
 import Test.HUnitExtras
 
-import Math.ConservationLaws
-import Math.Curves
-import Math.Integration
-import Math.LinearAlgebra
+import Math.Hclaws.ConservationLaws
+import Math.Hclaws.Curves
+import Math.Hclaws.Integration
+import Math.Hclaws.LinearAlgebra
 
-import Math.ConservationLaws.Examples.Linear as L
+import Math.Hclaws.Systems.Linear as L
 
 tests :: TestTree
 tests = testGroup "Math.ConservationLaws.Examples.Linear" [properties, unitTests]

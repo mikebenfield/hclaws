@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Examples.TwoComponentChromatography (
+module Math.Hclaws.Systems.TwoComponentChromatography (
 system,
 solution1, solution2, solution3, solution4, solution5
 ) where
@@ -10,7 +10,7 @@ import Data.Proxy
 import Math.FTensor.Algebra
 import Math.FTensor.General as F
 
-import Math.ConservationLaws
+import Math.Hclaws.ConservationLaws
 
 u :: F.TensorBoxed '[2] Double -> Double
 u t = F.pIndex t (Proxy::Proxy '[0])

@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Tests.Math.ConservationLaws.FrontTracking (
+module Tests.Math.Hclaws.FrontTracking (
     tests
 ) where
 
@@ -17,13 +17,13 @@ import Test.HUnitExtras
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 
-import Math.Fan
-import Math.LinearAlgebra
-import qualified Math.ConservationLaws.Examples.Burgers as B
-import qualified Math.ConservationLaws.Examples.Linear as L
-import qualified Math.ConservationLaws.Examples.ShallowWater as SW
+import Math.Hclaws.Fan
+import Math.Hclaws.LinearAlgebra
+import qualified Math.Hclaws.Systems.Burgers as B
+import qualified Math.Hclaws.Systems.Linear as L
+import qualified Math.Hclaws.Systems.ShallowWater as SW
 
-import qualified Math.ConservationLaws.FrontTracking as FT
+import qualified Math.Hclaws.FrontTracking as FT
 
 tests :: TestTree
 tests = $(testGroupGenerator)

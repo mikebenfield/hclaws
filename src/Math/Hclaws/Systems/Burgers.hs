@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Examples.Burgers (
+module Math.Hclaws.Systems.Burgers (
     system,
     solution1, solution2, solution3, solution4, solution5,
     solutions,
@@ -12,8 +12,8 @@ import Data.Proxy
 import qualified Math.FTensor.General as F
 import Math.FTensor.Algebra
 
-import Math.Fan
-import Math.ConservationLaws
+import Math.Hclaws.Fan
+import Math.Hclaws.ConservationLaws
 
 u :: F.TensorBoxed '[1] Double -> Double
 u pt = F.pIndex pt (Proxy::Proxy '[0])

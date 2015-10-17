@@ -6,7 +6,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Tests.Math.Integration (
+module Tests.Math.Hclaws.Integration (
     tests
 ) where
 
@@ -19,10 +19,10 @@ import Test.Tasty.TH (testGroupGenerator)
 import Test.HUnitExtras
 
 import Math.FTensor.General as F
-import Math.Curves
-import Math.LinearAlgebra
+import Math.Hclaws.Curves
+import Math.Hclaws.LinearAlgebra
 
-import qualified Math.Integration as I
+import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests = $(testGroupGenerator)

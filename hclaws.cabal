@@ -1,4 +1,4 @@
-name:                claws
+name:                hclaws
 version:             0.1.0.0
 synopsis:            Experimenting with and solving Conservation Laws.
 license:             BSD3
@@ -10,20 +10,20 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Math.ConservationLaws
-                       Math.Integration
-                       Math.Curves
-                       Math.Differentiation
-                       Math.Fan
-                       Math.LinearAlgebra
-                       Math.ConservationLaws.Plot
-                       Math.ConservationLaws.FrontTracking
-                       Math.ConservationLaws.Examples.Burgers
-                       Math.ConservationLaws.Examples.Linear
-                       Math.ConservationLaws.Examples.ShallowWater
-                       Math.ConservationLaws.Examples.TveitoWinther1995_3
-                       Math.ConservationLaws.Examples.TwoComponentChromatography
-                       Math.ConservationLaws.Examples.JenssenYoung2004_31
+  exposed-modules:     Math.Hclaws.ConservationLaws
+                       Math.Hclaws.Integration
+                       Math.Hclaws.Curves
+                       Math.Hclaws.Differentiation
+                       Math.Hclaws.Fan
+                       Math.Hclaws.LinearAlgebra
+                       Math.Hclaws.Plot
+                       Math.Hclaws.FrontTracking
+                       Math.Hclaws.Systems.Burgers
+                       Math.Hclaws.Systems.Linear
+                       Math.Hclaws.Systems.ShallowWater
+                       Math.Hclaws.Systems.TveitoWinther1995_3
+                       Math.Hclaws.Systems.TwoComponentChromatography
+                       Math.Hclaws.Systems.JenssenYoung2004_31
   build-depends:       base >=4.7 && <4.9,
                        vector >=0.11,
                        vector-th-unbox,
@@ -43,7 +43,7 @@ library
                        -fno-warn-missing-signatures
                        -funbox-strict-fields
 
-test-suite claws-test
+test-suite hclaws-test
   type: exitcode-stdio-1.0
   build-depends:       base >=4.7 && <4.9,
                        tasty >=0.10,
@@ -54,17 +54,17 @@ test-suite claws-test
                        ftensor,
                        vector,
                        containers,
-                       claws
+                       hclaws
   main-is:             Main.hs
   hs-source-dirs:      test
   default-language:    Haskell2010
 
-benchmark claws-bench
+benchmark hclaws-bench
   type: exitcode-stdio-1.0
   build-depends:       base >=4.7 && <4.9,
                        criterion,
                        vector,
-                       claws
+                       hclaws
   main-is:             Main.hs
   hs-source-dirs:      bench
   default-language:    Haskell2010

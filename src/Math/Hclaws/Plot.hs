@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Plot (
+module Math.Hclaws.Plot (
     plotFronts,
     samplePlotFronts,
     output,
@@ -15,11 +15,11 @@ import Graphics.EasyPlot
 
 import qualified Math.FTensor.General as F
 
-import Math.ConservationLaws
-import Math.ConservationLaws.FrontTracking
-import Math.Fan
-import qualified Math.ConservationLaws.Examples.ShallowWater as SW
-import qualified Math.ConservationLaws.Examples.TveitoWinther1995_3 as TW
+import Math.Hclaws.ConservationLaws
+import Math.Hclaws.FrontTracking
+import Math.Hclaws.Fan
+import qualified Math.Hclaws.Systems.ShallowWater as SW
+import qualified Math.Hclaws.Systems.TveitoWinther1995_3 as TW
 
 frontToColor :: Front -> Color
 frontToColor Front {family = 0} = Red

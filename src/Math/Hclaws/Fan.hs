@@ -1,5 +1,5 @@
 
-module Math.Fan (
+module Math.Hclaws.Fan (
     Fan(..),
     iLength,
     indexI,

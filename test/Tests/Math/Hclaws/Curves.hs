@@ -1,5 +1,5 @@
 
-module Tests.Math.Curves (
+module Tests.Math.Hclaws.Curves (
     tests
 ) where
 
@@ -10,11 +10,11 @@ import qualified Test.Tasty.HUnit as HU
 
 import Test.HUnitExtras
 
-import Math.LinearAlgebra
+import Math.Hclaws.LinearAlgebra
 
-import qualified Math.Curves as C
+import qualified Math.Hclaws.Curves as C
 
-import qualified Math.Integration as I
+import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests = testGroup "Math.Curves" [properties, unitTests]

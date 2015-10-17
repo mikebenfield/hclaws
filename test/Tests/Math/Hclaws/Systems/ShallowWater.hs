@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedLists#-}
 
-module Tests.Math.ConservationLaws.Examples.ShallowWater (
+module Tests.Math.Hclaws.Systems.ShallowWater (
     tests
 ) where
 
@@ -11,13 +11,13 @@ import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
 import Test.HUnitExtras
-import Math.LinearAlgebra
 
-import qualified Math.ConservationLaws as CL
-import qualified Math.ConservationLaws.Examples.ShallowWater as SW
+import qualified Math.Hclaws.ConservationLaws as CL
+import qualified Math.Hclaws.Systems.ShallowWater as SW
 
-import Math.Curves
-import qualified Math.Integration as I
+import Math.Hclaws.Curves
+import Math.Hclaws.LinearAlgebra
+import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests =

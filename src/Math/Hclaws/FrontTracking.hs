@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Math.ConservationLaws.FrontTracking (
+module Math.Hclaws.FrontTracking (
     Piecewise,
     evalPiecewise,
     PiecewiseXt,
@@ -24,8 +24,8 @@ import qualified Data.Set as Set
 
 import qualified Data.Vector as V
 
-import Math.ConservationLaws
-import Math.Fan
+import Math.Hclaws.ConservationLaws
+import Math.Hclaws.Fan
 
 type Piecewise (n::Nat) = Fan (Vector n) Double
 
@@ -264,7 +264,7 @@ loop config@Configuration{..} system m output@Output{..} =
                 { origin = origin'
                 , end = Nothing
                 , family = sFamily s
-                , speed = Math.ConservationLaws.speed s
+                , speed = Math.Hclaws.ConservationLaws.speed s
                 , frontType = SFront
                 })]
 

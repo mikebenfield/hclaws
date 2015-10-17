@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 
-module Math.ConservationLaws.Examples.ShallowWater (
+module Math.Hclaws.Systems.ShallowWater (
     system,
     solution1,
     solution2, solution3, solution4, solution5,
@@ -11,8 +11,8 @@ import Data.Proxy
 import Math.FTensor.Algebra
 import Math.FTensor.General as F
 
-import Math.Fan
-import Math.ConservationLaws
+import Math.Hclaws.Fan
+import Math.Hclaws.ConservationLaws
 
 h :: F.TensorBoxed '[2] Double -> Double
 h t = F.pIndex t (Proxy::Proxy '[0])

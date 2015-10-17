@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Math.LinearAlgebra (
+module Math.Hclaws.LinearAlgebra (
     Point(..),
     point,
     Normable(..),
