@@ -1,7 +1,7 @@
 name:                hclaws
 version:             0.1.0.0
 synopsis:            Experimenting with and solving Conservation Laws.
-license:             BSD3
+license:             ISC
 license-file:        LICENSE
 author:              Michael Benfield
 maintainer:          mike.benfield@gmail.com
