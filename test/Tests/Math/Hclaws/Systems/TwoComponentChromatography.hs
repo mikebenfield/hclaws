@@ -10,18 +10,13 @@ import qualified Test.Tasty.QuickCheck as QC
 import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
-import Test.HUnitExtras
+import Test.Curves
 
-import Math.Hclaws.LinearAlgebra
-import qualified Math.Hclaws.ConservationLaws as CL
 import qualified Math.Hclaws.Systems.TwoComponentChromatography as TCC
-
-import Math.Hclaws.Curves
-import qualified Math.Hclaws.Integration as I
 
 tests :: TestTree
 tests =
-    testGroup "Math.ConservationLaws.Examples.TwoComponentChromatography"
+    testGroup "Math.Hclaws.Systems.TwoComponentChromatography"
         [properties, unitTests]
 
 properties :: TestTree
@@ -29,28 +24,11 @@ properties = testGroup "Properties"
     [
     ]
 
-testCurves :: [Curve]
-testCurves =
-    [ box (point (-5) 1) 20 20
-    , box (point (-10) 2) 50 3
-    , box (point (-30) 3) 100 20
-    , circle (point 0 5) 4
-    , circle (point (-1) 2) 1
-    , circle (point 1 2) 1
-    ]
-
-testWaveFan :: CL.WaveFan 2 -> String -> TestTree
-testWaveFan wf name =
-    HU.testCase name $ mapM_ intOnCurve testCurves
-  where
-    intOnCurve cc =
-        CL.integrateFanOnCurve cc (TCC.system 1) wf @?~ [0,0]
-
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
-    [ testWaveFan TCC.solution1 "computed solution 1"
-    , testWaveFan TCC.solution2 "computed solution 2"
-    , testWaveFan TCC.solution3 "computed solution 3"
-    , testWaveFan TCC.solution4 "computed solution 4"
-    , testWaveFan TCC.solution5 "computed solution 5"
+    [ waveFanTestGroup TCC.solution1 (TCC.system 1) "computed solution 1"
+    , waveFanTestGroup TCC.solution2 (TCC.system 1) "computed solution 2"
+    , waveFanTestGroup TCC.solution3 (TCC.system 1) "computed solution 3"
+    , waveFanTestGroup TCC.solution4 (TCC.system 1) "computed solution 4"
+    , waveFanTestGroup TCC.solution5 (TCC.system 1) "computed solution 5"
     ]

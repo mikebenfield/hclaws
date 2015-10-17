@@ -10,48 +10,25 @@ import qualified Test.Tasty.QuickCheck as QC
 import qualified Test.Tasty.SmallCheck as SC
 import qualified Test.Tasty.HUnit as HU
 
-import Test.HUnitExtras
+import Test.Curves
 
 import qualified Math.Hclaws.ConservationLaws as CL
 import qualified Math.Hclaws.Systems.Burgers as B
 
-import Math.Hclaws.Curves
-import Math.Hclaws.LinearAlgebra
-import qualified Math.Hclaws.Integration as I
-
 tests :: TestTree
-tests = testGroup "Math.ConservationLaws.Examples.Burgers" [properties, unitTests]
+tests = testGroup "Math.Hclaws.Systems.Burgers" [properties, unitTests]
 
 properties :: TestTree
 properties = testGroup "Properties"
     [
     ]
 
-testCurves :: [Curve]
-testCurves =
-    [ box (point (-5) 1) 20 20
-    , box (point (-10) 2) 50 3
-    , box (point (-30) 3) 100 20
-    , circle (point 0 5) 4
-    , circle (point (-1) 2) 1
-    , circle (point 1 2) 1
-    ]
-
-testWaveFan :: CL.WaveFan 1 -> String -> TestTree
-testWaveFan wf name = do
-    HU.testCase name $ mapM_ intOnCurve testCurves
-  where
-    intOnCurve cc =
-        CL.integrateFanOnCurve cc B.system wf @?~ [0]
-
 unitTests :: TestTree
 unitTests = testGroup "Unit Tests" $
-    [ testWaveFan B.solution1 "manual solution 1"
-    , testWaveFan B.solution2 "manual solution 2"
-    , testWaveFan B.solution3 "manual solution 3"
-    , testWaveFan B.solution4 "computed solution 3"
-
-    , testWaveFan (CL.solveRiemann B.system [-1] [1]) "Example 1"
-    , testWaveFan (CL.solveRiemann B.system [13] [0]) "Example 2"
-    , testWaveFan B.solution5 "computed solution 4"
+    [ waveFanTestGroup B.solution1 B.system "solution 1"
+    , waveFanTestGroup B.solution2 B.system "solution 2"
+    , waveFanTestGroup B.solution3 B.system "solution 3"
+    , waveFanTestGroup B.solution4 B.system "solution 4"
+    , waveFanTestGroup (CL.solveRiemann B.system [-1] [1]) B.system "Example 1"
+    , waveFanTestGroup (CL.solveRiemann B.system [13] [0]) B.system "Example 2"
     ]
